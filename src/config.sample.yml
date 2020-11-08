@@ -1,6 +1,7 @@
 Credential:
     Nickname: BotName
-    Token: Token_here
+    ID: App_ID_Here
+    Secret: App_Secret_Here
 StackSize: 60
 AgregChans:
     - megadamage
