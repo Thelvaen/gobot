@@ -1,8 +1,5 @@
-Nickname: Thelvaen_Bot
-Token: oauth:token_toto
-Pile: 40
-Channels:
+
+StackSize: 60
+AgregChans:
     - megadamage
     - thelvaen_mandel
-    - krayn_live
-    - antoinedaniellive
