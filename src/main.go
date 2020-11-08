@@ -1,20 +1,29 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 
-	"github.com/gempir/go-twitch-irc"
+	twitchbot "github.com/gempir/go-twitch-irc"
 	"github.com/spf13/viper"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
+	"golang.org/x/oauth2/twitch"
 )
 
 var (
-	err       error
-	client    *twitch.Client
-	messages  []string
-	position  int
-	stackSize int
-	channels  []string
+	err          error
+	client       *twitchbot.Client
+	messages     []string
+	position     int
+	stackSize    int
+	channels     []string
+	tokenStruct  *oauth2.Token
+	tokenDef     bool
+	token        string
+	oauth2Config *clientcredentials.Config
 )
 
 func init() {
@@ -31,6 +40,22 @@ func init() {
 	messages = make([]string, stackSize+10)
 	position = 0
 
+	// Getting OAuth Token if credentials are provided
+	if viper.IsSet("Credential.ID") && viper.IsSet("Credential.Secret") {
+		oauth2Config = &clientcredentials.Config{
+			ClientID:     viper.GetString("Credential.ID"),
+			ClientSecret: viper.GetString("Credential.Secret"),
+			TokenURL:     twitch.Endpoint.TokenURL,
+		}
+		tokenStruct, err = oauth2Config.Token(context.Background())
+		token = tokenStruct.AccessToken
+		if err != nil {
+			log.Fatal(err)
+		}
+		tokenDef = true
+	} else {
+		tokenDef = false
+	}
 	// Initializing routes
 	http.HandleFunc("/messages", getMessages)
 }
@@ -60,14 +85,15 @@ func main() {
 	go http.ListenAndServe(":8090", nil)
 
 	// Connecting to Twitch
-	if viper.IsSet("Credential.Nickname") && viper.IsSet("Credential.Token") {
+	if tokenDef {
 		// Credentials defined in config, auth connection
+		client = twitchbot.NewClient(viper.GetString("Credential.Nickname"), fmt.Sprintf("oauth:%s", token))
 	} else {
 		// No credentials provided, anon connection
-		client = twitch.NewAnonymousClient()
+		client = twitchbot.NewAnonymousClient()
 	}
 
-	client.OnPrivateMessage(func(message twitch.PrivateMessage) {
+	client.OnPrivateMessage(func(message twitchbot.PrivateMessage) {
 		pushMessage(fmt.Sprintf("#%s &lt;%s&gt; %s", message.Channel, message.User.Name, message.Message))
 	})
 
@@ -77,6 +103,6 @@ func main() {
 
 	err = client.Connect()
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("can't connect to Twitch: %s", err))
 	}
 }
