@@ -1,8 +1,8 @@
 Credential:
-    Nickname: BotName
-    ID: App_ID_Here
-    Secret: App_Secret_Here
+    Nickname: TwitchUserName
+    Token: oauth:XXXXXXXXXXX
 StackSize: 60
+Port: 8090
 AgregChans:
     - megadamage
     - thelvaen_mandel

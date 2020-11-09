@@ -1,29 +1,24 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"net/http"
 
-	twitchbot "github.com/gempir/go-twitch-irc"
+	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/spf13/viper"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/clientcredentials"
-	"golang.org/x/oauth2/twitch"
 )
 
 var (
-	err          error
-	client       *twitchbot.Client
-	messages     []string
-	position     int
-	stackSize    int
-	channels     []string
-	tokenStruct  *oauth2.Token
-	tokenDef     bool
-	token        string
-	oauth2Config *clientcredentials.Config
+	err       error
+	client    *twitch.Client
+	messages  []string
+	position  int
+	stackSize int
+	channels  []string
+	tokenDef  bool
+
+	url  string
+	port string
 )
 
 func init() {
@@ -40,22 +35,15 @@ func init() {
 	messages = make([]string, stackSize+10)
 	position = 0
 
-	// Getting OAuth Token if credentials are provided
-	if viper.IsSet("Credential.ID") && viper.IsSet("Credential.Secret") {
-		oauth2Config = &clientcredentials.Config{
-			ClientID:     viper.GetString("Credential.ID"),
-			ClientSecret: viper.GetString("Credential.Secret"),
-			TokenURL:     twitch.Endpoint.TokenURL,
-		}
-		tokenStruct, err = oauth2Config.Token(context.Background())
-		token = tokenStruct.AccessToken
-		if err != nil {
-			log.Fatal(err)
-		}
-		tokenDef = true
+	tokenDef = true
+
+	if viper.IsSet("Port") {
+		port = fmt.Sprintf(":%d", viper.GetInt("Port"))
 	} else {
-		tokenDef = false
+		port = ":8090"
 	}
+	url = ""
+
 	// Initializing routes
 	http.HandleFunc("/messages", getMessages)
 }
@@ -74,6 +62,12 @@ func pushMessage(data string) {
 
 func getMessages(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "<html><head><title>Aggregateur de message</title><meta content='5' http-equiv='refresh'/></head><body><ul>")
+	fmt.Fprintf(w, "<h1>")
+	for _, channel := range channels {
+		fmt.Fprintf(w, channel)
+		fmt.Fprintf(w, " ")
+	}
+	fmt.Fprintf(w, "</h1>")
 	for i := 0; i < position; i++ {
 		fmt.Fprintf(w, "<li>%s</li>\n", messages[i])
 	}
@@ -82,18 +76,17 @@ func getMessages(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	// Starting web server as a Go Routine (background thread)
-	go http.ListenAndServe(":8090", nil)
+	go http.ListenAndServe(fmt.Sprintf("%s%s", url, port), nil)
 
 	// Connecting to Twitch
-	if tokenDef {
-		// Credentials defined in config, auth connection
-		client = twitchbot.NewClient(viper.GetString("Credential.Nickname"), fmt.Sprintf("oauth:%s", token))
+	if viper.IsSet("Credential.Nickname") && viper.IsSet("Credential.Token") {
+		client = twitch.NewClient(viper.GetString("Credential.Nickname"), viper.GetString("Credential.Token"))
 	} else {
 		// No credentials provided, anon connection
-		client = twitchbot.NewAnonymousClient()
+		client = twitch.NewAnonymousClient()
 	}
 
-	client.OnPrivateMessage(func(message twitchbot.PrivateMessage) {
+	client.OnPrivateMessage(func(message twitch.PrivateMessage) {
 		pushMessage(fmt.Sprintf("#%s &lt;%s&gt; %s", message.Channel, message.User.Name, message.Message))
 	})
 
