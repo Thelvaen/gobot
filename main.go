@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"net/http"
 
 	"github.com/gempir/go-twitch-irc/v2"
@@ -87,7 +88,7 @@ func main() {
 	}
 
 	client.OnPrivateMessage(func(message twitch.PrivateMessage) {
-		pushMessage(fmt.Sprintf("#%s &lt;%s&gt; %s", message.Channel, message.User.Name, message.Message))
+		pushMessage(fmt.Sprintf("#%s [%02d:%02d:%02d] &lt;%s&gt; %s", message.Channel, message.Time.Hour(), message.Time.Minute(), message.Time.Second(), message.User.Name, message.Message))
 	})
 
 	for _, channel := range channels {
