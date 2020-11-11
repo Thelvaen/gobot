@@ -3,6 +3,6 @@ Credential:
     Token: oauth:XXXXXXXXXXX
 StackSize: 60
 Port: 8090
+MainChannel: thelvaen_mandel
 AgregChans:
     - megadamage
-    - thelvaen_mandel
