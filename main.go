@@ -41,7 +41,7 @@ func init() {
 	randomSource = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	stackSize = viper.GetInt("StackSize")
-	channels = viper.GetStringSlice("AgregChans")
+	channels = viper.GetStringSlice("AggregChans")
 	mainChan = viper.GetString("MainChannel")
 
 	messages = make([]string, stackSize+10)

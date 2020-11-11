@@ -4,4 +4,4 @@ To get your oauth token, please go to https://twitchapps.com/tmi/ and click conn
 If Port is not defined in the config, it will use 8090 as default.
 
 # Functions
-* Aggregated messages (AgregChans array in the config.yml), go to http://[server]:Port/messages
+* Aggregated messages (AggregChans array in the config.yml), go to http://[server]:Port/messages

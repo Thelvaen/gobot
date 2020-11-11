@@ -4,5 +4,5 @@ Credential:
 StackSize: 60
 Port: 8090
 MainChannel: thelvaen_mandel
-AgregChans:
+AggregChans:
     - megadamage
