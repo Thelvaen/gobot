@@ -2,145 +2,85 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
-	"reflect"
+	"regexp"
 	"strconv"
-	"strings"
-	"time"
-	"unicode"
+
+	"gobot/aggregator"
+	"gobot/config"
+	"gobot/dice"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/spf13/viper"
 )
 
 var (
-	err          error
-	twitchC      *twitch.Client
-	messages     []string
-	position     int
-	stackSize    int
-	mainChan     string
-	channels     []string
-	randomSource *rand.Rand
-	routes       map[string]string
+	err      error
+	mainChan string
+	channels []string
+
+	// Filters gives RegEx and function to call when matching
+	filters map[string](func(twitch.PrivateMessage) string)
+	// WebRoutes gives endpoints and function to call
+	webRoutes map[string]config.WebTarget
 
 	url  string
 	port string
 )
 
 func init() {
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	err = viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
-	}
+	mainChan = config.BotConfig.Cred.Channel
 
-	randomSource = rand.New(rand.NewSource(time.Now().UnixNano()))
+	filters = make(map[string](func(twitch.PrivateMessage) string))
+	webRoutes = make(map[string]config.WebTarget)
 
-	stackSize = viper.GetInt("StackSize")
-	channels = viper.GetStringSlice("AggregChans")
-	mainChan = viper.GetString("MainChannel")
-
-	messages = make([]string, stackSize+10)
-	position = 0
-
-	routes = make(map[string]string)
-
-	if viper.IsSet("Port") {
-		port = fmt.Sprintf(":%d", viper.GetInt("Port"))
+	// Connecting to Twitch
+	if config.BotConfig.Cred.IsAuth {
+		config.BotConfig.TwitchC = twitch.NewClient(mainChan, config.BotConfig.Cred.Token)
 	} else {
-		port = ":8090"
+		// No credentials provided, anon connection
+		config.BotConfig.TwitchC = twitch.NewAnonymousClient()
 	}
-	url = ""
 
-	// Initializing routes
-	addRoute("/messages", "Aggregateur de message", getMessages)
-	addRoute("/concours", "Concours", getDraw)
-	http.HandleFunc("/", getHome)
+	// Initializing Web Server for /
+	http.HandleFunc("/", getPage)
+
+	// Adding filters & endpoints
+	dice.Initialize()
+	for filter, modFunction := range dice.Filters {
+		filters[filter] = modFunction
+	}
+	for route, modFunction := range dice.WebRoutes {
+		webRoutes[route] = modFunction
+	}
+
+	aggregator.Initialize()
+	for filter, modFunction := range aggregator.Filters {
+		filters[filter] = modFunction
+	}
+	for route, routeDetails := range aggregator.WebRoutes {
+		webRoutes[route] = config.WebTarget{
+			RouteFunc: routeDetails.RouteFunc,
+			RouteDesc: routeDetails.RouteDesc,
+		}
+		http.HandleFunc(route, getPage)
+	}
 }
 
-func addRoute(route, desc string, handler func(http.ResponseWriter, *http.Request)) {
-	routes[route] = desc
-	http.HandleFunc(route, handler)
+func pushAndSay(data string) {
+	config.BotConfig.TwitchC.Say(mainChan, data)
 }
 
-func isInt(s string) bool {
-	for _, c := range s {
-		if !unicode.IsDigit(c) {
-			return false
+func getPage(w http.ResponseWriter, req *http.Request) {
+	for route, routeDetails := range webRoutes {
+		if req.RequestURI == route {
+			servePage(w, routeDetails.RouteFunc(req))
+			break
 		}
 	}
-	return true
 }
 
-func inArray(needle interface{}, haystack interface{}) (exists bool) {
-	exists = false
-
-	switch reflect.TypeOf(haystack).Kind() {
-	case reflect.Slice:
-		s := reflect.ValueOf(haystack)
-		for i := 0; i < s.Len(); i++ {
-			if reflect.DeepEqual(needle, s.Index(i).Interface()) == true {
-				exists = true
-				return
-			}
-		}
-	}
-	return
-}
-
-func rollDice(userName string, faces int) {
-	// Rolling a dice
-	var message string
-	message = "* Lance un dé à " + strconv.Itoa(faces) + " faces pour " + userName + " et obtient : " + strconv.Itoa(randomSource.Intn(faces)+1)
-	twitchC.Say(mainChan, message)
-	pushMessage(fmt.Sprintf("#%s [%02d:%02d:%02d] &lt;%s&gt; %s", mainChan, time.Now().Hour(), time.Now().Minute(), time.Now().Second(), viper.GetString("Credential.Nickname"), message))
-}
-
-func pushMessage(data string) {
-	if position >= stackSize {
-		messages[position] = data
-		for i := 0; i <= position-1; i++ {
-			messages[i] = messages[i+1]
-		}
-	} else {
-		messages[position] = data
-		position++
-	}
-}
-
-func getDraw(w http.ResponseWriter, req *http.Request) {
-}
-
-func getMessages(w http.ResponseWriter, req *http.Request) {
-	var body string
-	reloadScript := heredoc.Doc(`
-<script type="text/javascript" language="javascript">
-setTimeout(function(){
-	window.location.reload(1);
-}, 5000);
-</script>
-	`)
-	body = "<h1>"
-	for _, channel := range channels {
-		body += channel + " "
-	}
-	body += mainChan + "</h1><ul>"
-	for i := 0; i < position; i++ {
-		body += "<li>" + messages[i] + "</li>\n"
-	}
-	body += "</ul>" + reloadScript
-	getPage(w, body)
-}
-
-func getHome(w http.ResponseWriter, req *http.Request) {
-	getPage(w, "<h1>Hello World !</h1>")
-}
-
-func getPage(w http.ResponseWriter, body string) {
+func servePage(w http.ResponseWriter, body string) {
 	header := heredoc.Doc(`
 <!DOCTYPE html>
 <html><head><title>Twitch bot</title>
@@ -168,8 +108,8 @@ func getNavigation() string {
 	<div class="collapse navbar-collapse" id="navbarNav">
 		<ul class="navbar-nav">
 `)
-	for route, desc := range routes {
-		navigation += "<li class=\"nav-item\">" + fmt.Sprintf("<a href=\"%s\">%s</a>", route, desc) + "</li>"
+	for route, routeDetails := range webRoutes {
+		navigation += "<li class=\"nav-item\">" + fmt.Sprintf("<a href=\"%s\">%s</a>", route, routeDetails.RouteDesc) + "</li>"
 	}
 	navigationFooter := heredoc.Doc(`
 		</ul>
@@ -180,56 +120,29 @@ func getNavigation() string {
 }
 
 func parseMessage(message twitch.PrivateMessage) {
-	pushMessage(fmt.Sprintf("#%s [%02d:%02d:%02d] &lt;%s&gt; %s", message.Channel, message.Time.Hour(), message.Time.Minute(), message.Time.Second(), message.User.Name, message.Message))
-	if (message.Channel == mainChan) && strings.HasPrefix(message.Message, "!") {
-		// Command to process
-		command := strings.Fields(message.Message)
-		switch command[0] {
-		case "!dice":
-			faces := 10
-			if len(command) > 1 {
-				if !isInt(command[1]) {
-					twitchC.Say(mainChan, fmt.Sprintf("J'ai beau essayer, ça je ne vois absolument pas comment faire sans casser toutes les lois de la physique"))
-					break
-				}
-				// Dice faces
-				faces, _ = strconv.Atoi(command[1])
-				des := []int{2, 3, 4, 6, 8, 10, 12, 16, 20, 24, 100}
-				if !inArray(faces, des) {
-					break
+	if config.BotConfig.Cred.IsAuth {
+		if message.Channel == mainChan {
+			// Command to process
+			for filter, modFunction := range filters {
+				if found, _ := regexp.MatchString(filter, message.Message); found {
+					pushAndSay(modFunction(message))
 				}
 			}
-			rollDice(message.User.Name, faces)
-		case "!concours":
-
 		}
 	}
 }
 
 func main() {
 	// Starting web server as a Go Routine (background thread)
-	go http.ListenAndServe(fmt.Sprintf("%s%s", url, port), nil)
+	go http.ListenAndServe(config.BotConfig.BotServer.URL+":"+strconv.Itoa(config.BotConfig.BotServer.Port), nil)
 
-	// Connecting to Twitch
-	if viper.IsSet("Credential.Nickname") && viper.IsSet("Credential.Token") {
-		twitchC = twitch.NewClient(viper.GetString("Credential.Nickname"), viper.GetString("Credential.Token"))
-		//fmt.Println("Authenticated connection")
-	} else {
-		// No credentials provided, anon connection
-		twitchC = twitch.NewAnonymousClient()
-		//fmt.Println("Anonymous connection")
-	}
-
-	twitchC.OnPrivateMessage(func(message twitch.PrivateMessage) {
+	config.BotConfig.TwitchC.OnPrivateMessage(func(message twitch.PrivateMessage) {
 		parseMessage(message)
 	})
 
-	twitchC.Join(mainChan)
-	for _, channel := range channels {
-		twitchC.Join(channel)
-	}
+	config.BotConfig.TwitchC.Join(mainChan)
 
-	err = twitchC.Connect()
+	err = config.BotConfig.TwitchC.Connect()
 	if err != nil {
 		panic(fmt.Errorf("can't connect to Twitch: %s", err))
 	}

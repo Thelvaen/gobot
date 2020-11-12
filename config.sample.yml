@@ -1,8 +1,10 @@
-Credential:
-    Nickname: TwitchUserName
+Twitch:
+    Channel: TwitchUserName
     Token: oauth:XXXXXXXXXXX
-StackSize: 60
-Port: 8090
-MainChannel: thelvaen_mandel
-AggregChans:
-    - megadamage
+Http:
+    Port: 8090
+    URL:
+Aggreg:
+    StackSize: 60
+    Channels:
+        - megadamage
