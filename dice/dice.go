@@ -14,17 +14,17 @@ import (
 
 var (
 	// Filters gives RegEx and function to call when matching
-	Filters map[string](func(twitch.PrivateMessage) string)
+	Filters config.CommandFilter
 	// WebRoutes gives endpoints and function to call
-	WebRoutes map[string]config.WebTarget
+	WebRoutes config.WebRoutes
 
 	randomSource *rand.Rand
 	diceConfig   config.Configuration
 )
 
 func init() {
-	Filters = make(map[string](func(twitch.PrivateMessage) string))
-	WebRoutes = make(map[string]config.WebTarget)
+	Filters = make(config.CommandFilter)
+	WebRoutes = make(config.WebRoutes)
 
 	Filters["^!dice"] = RollDice
 	randomSource = rand.New(rand.NewSource(time.Now().UnixNano()))

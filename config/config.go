@@ -22,6 +22,12 @@ type WebTarget struct {
 	RouteDesc string
 }
 
+// CommandFilter is the map used to store regex & function to parse them
+type CommandFilter map[string](func(twitch.PrivateMessage) string)
+
+// WebRoutes is the map used to store routes & function to process them
+type WebRoutes map[string]WebTarget
+
 // Configuration object
 type Configuration struct {
 	// Cred stores credentials

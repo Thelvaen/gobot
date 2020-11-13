@@ -10,23 +10,23 @@ import (
 )
 
 var (
-	err       error
-	messages  []string
-	position  int
-	stackSize int
-	mainChan  string
-	channels  []string
 	// Filters gives RegEx and function to call when matching
-	Filters map[string](func(twitch.PrivateMessage) string)
+	Filters config.CommandFilter
 	// WebRoutes gives endpoints and function to call
-	WebRoutes map[string]config.WebTarget
+	WebRoutes config.WebRoutes
 
+	err               error
+	messages          []string
+	position          int
+	stackSize         int
+	mainChan          string
+	channels          []string
 	aggregatoreConfig config.Configuration
 )
 
 func init() {
-	Filters = make(map[string](func(twitch.PrivateMessage) string))
-	WebRoutes = make(map[string]config.WebTarget)
+	Filters = make(config.CommandFilter)
+	WebRoutes = make(config.WebRoutes)
 
 	Filters[".*"] = pushMessage
 	WebRoutes["/messages"] = config.WebTarget{

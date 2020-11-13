@@ -20,9 +20,9 @@ var (
 	channels []string
 
 	// Filters gives RegEx and function to call when matching
-	filters map[string](func(twitch.PrivateMessage) string)
+	filters config.CommandFilter
 	// WebRoutes gives endpoints and function to call
-	webRoutes map[string]config.WebTarget
+	webRoutes config.WebRoutes
 
 	url  string
 	port string
@@ -31,8 +31,8 @@ var (
 func init() {
 	mainChan = config.BotConfig.Cred.Channel
 
-	filters = make(map[string](func(twitch.PrivateMessage) string))
-	webRoutes = make(map[string]config.WebTarget)
+	filters = make(config.CommandFilter)
+	webRoutes = make(config.WebRoutes)
 
 	// Connecting to Twitch
 	if config.BotConfig.Cred.IsAuth {
@@ -124,7 +124,8 @@ func parseMessage(message twitch.PrivateMessage) {
 		if message.Channel == mainChan {
 			// Command to process
 			for filter, modFunction := range filters {
-				if found, _ := regexp.MatchString(filter, message.Message); found {
+				found, _ := regexp.MatchString(filter, message.Message)
+				if found {
 					pushAndSay(modFunction(message))
 				}
 			}
