@@ -6,9 +6,10 @@ import (
 	"regexp"
 	"strconv"
 
-	"gobot/aggregator"
-	"gobot/config"
-	"gobot/dice"
+	"github.com/thelvaen/gobot/aggregator"
+	"github.com/thelvaen/gobot/config"
+	"github.com/thelvaen/gobot/dice"
+	"github.com/thelvaen/gobot/giveaway"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gempir/go-twitch-irc/v2"
@@ -42,18 +43,14 @@ func init() {
 		config.BotConfig.TwitchC = twitch.NewAnonymousClient()
 	}
 
-	// Initializing Web Server for /
-	http.HandleFunc("/", getPage)
-
 	// Adding filters & endpoints
+	// Dice Module
 	dice.Initialize()
 	for filter, modFunction := range dice.Filters {
 		filters[filter] = modFunction
 	}
-	for route, modFunction := range dice.WebRoutes {
-		webRoutes[route] = modFunction
-	}
 
+	// Aggregator Module
 	aggregator.Initialize()
 	for filter, modFunction := range aggregator.Filters {
 		filters[filter] = modFunction
@@ -65,6 +62,31 @@ func init() {
 		}
 		http.HandleFunc(route, getPage)
 	}
+
+	// GiveAway Module
+	giveaway.Initialize()
+	for filter, modFunction := range giveaway.Filters {
+		filters[filter] = modFunction
+	}
+	for route, routeDetails := range giveaway.WebRoutes {
+		webRoutes[route] = config.WebTarget{
+			RouteFunc: routeDetails.RouteFunc,
+			RouteDesc: routeDetails.RouteDesc,
+		}
+		http.HandleFunc(route, getPage)
+	}
+
+	// Webroot
+	webRoutes["/"] = config.WebTarget{
+		RouteFunc: getHome,
+		RouteDesc: "Home",
+	}
+	http.HandleFunc("/", getPage)
+}
+
+func getHome(req *http.Request) (body string) {
+	body = "<h1>Hello World !"
+	return
 }
 
 func pushAndSay(data string) {
@@ -101,7 +123,7 @@ func getNavigation() string {
 	var navigation string
 	navigationHeader := heredoc.Doc(`
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-	<a class="navbar-brand" href="/">Fonctions du Bot</a>
+	<a class="navbar-brand" href="#">Fonctions du Bot</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>
 	</button>

@@ -3,9 +3,14 @@ package config
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/spf13/viper"
+
+	bolt "go.etcd.io/bbolt"
 )
 
 var (
@@ -38,6 +43,8 @@ type Configuration struct {
 	BotServer WebServer
 	// Twitch Client store the Twitch Client interface
 	TwitchC *twitch.Client
+	// DataStore store the Database
+	DataStore *bolt.DB
 }
 
 // Credentials define Credential struct
@@ -101,6 +108,20 @@ func init() {
 	if viper.IsSet("Http.URL") {
 		BotConfig.BotServer.URL = viper.GetString("Http.URL")
 	}
+	// Opening DB
+	BotConfig.DataStore, err = bolt.Open("twitchbot.db", 0600, nil)
+	if err != nil {
+		panic(fmt.Errorf("can't open BoltDB: %s", err))
+	}
+
+	// Intercepting Ctrl+C to close DB properly
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		BotConfig.DataStore.Close()
+		os.Exit(0)
+	}()
 }
 
 func main() {

@@ -2,10 +2,11 @@ package aggregator
 
 import (
 	"fmt"
-	"gobot/config"
 	"net/http"
 
-	"github.com/MakeNowJust/heredoc"
+	"github.com/thelvaen/gobot/config"
+
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 

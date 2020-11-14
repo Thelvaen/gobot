@@ -1,13 +1,14 @@
 package dice
 
 import (
-	"gobot/config"
 	"math/rand"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/thelvaen/gobot/config"
 
 	"github.com/gempir/go-twitch-irc/v2"
 )
@@ -26,7 +27,8 @@ func init() {
 	Filters = make(config.CommandFilter)
 	WebRoutes = make(config.WebRoutes)
 
-	Filters["^!dice"] = RollDice
+	Filters["^!dice$"] = RollDice
+	Filters["^!dice \\d*$"] = RollDice
 	randomSource = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
@@ -73,7 +75,7 @@ func RollDice(message twitch.PrivateMessage) (dice string) {
 		if (len(command[1]) > 0) && !isInt(command[1]) {
 			return
 		}
-		faces, _ := strconv.Atoi(command[1])
+		faces, _ = strconv.Atoi(command[1])
 		des := []int{2, 3, 4, 6, 8, 10, 12, 16, 20, 24, 100}
 		if !inArray(faces, des) {
 			dice = "Essaye de choisir une valeur de dé existante"
