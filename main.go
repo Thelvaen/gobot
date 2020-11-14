@@ -10,6 +10,7 @@ import (
 	"github.com/thelvaen/gobot/config"
 	"github.com/thelvaen/gobot/dice"
 	"github.com/thelvaen/gobot/giveaway"
+	"github.com/thelvaen/gobot/polls"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gempir/go-twitch-irc/v2"
@@ -69,6 +70,19 @@ func init() {
 		filters[filter] = modFunction
 	}
 	for route, routeDetails := range giveaway.WebRoutes {
+		webRoutes[route] = config.WebTarget{
+			RouteFunc: routeDetails.RouteFunc,
+			RouteDesc: routeDetails.RouteDesc,
+		}
+		http.HandleFunc(route, getPage)
+	}
+
+	// Polls Module
+	polls.Initialize()
+	for filter, modFunction := range polls.Filters {
+		filters[filter] = modFunction
+	}
+	for route, routeDetails := range polls.WebRoutes {
 		webRoutes[route] = config.WebTarget{
 			RouteFunc: routeDetails.RouteFunc,
 			RouteDesc: routeDetails.RouteDesc,
