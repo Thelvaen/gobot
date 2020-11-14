@@ -3,99 +3,74 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
 	"regexp"
 	"strconv"
-
-	"github.com/thelvaen/gobot/aggregator"
-	"github.com/thelvaen/gobot/config"
-	"github.com/thelvaen/gobot/dice"
-	"github.com/thelvaen/gobot/giveaway"
-	"github.com/thelvaen/gobot/polls"
+	"syscall"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/spf13/viper"
+	bolt "go.etcd.io/bbolt"
 )
 
 var (
-	err      error
-	mainChan string
-	channels []string
-
-	// Filters gives RegEx and function to call when matching
-	filters config.CommandFilter
-	// WebRoutes gives endpoints and function to call
-	webRoutes config.WebRoutes
-
-	url  string
-	port string
+	err error
 )
 
 func init() {
-	mainChan = config.BotConfig.Cred.Channel
+	WebRoutes = make(WebRoutesT)
+	Filters = make(FiltersT)
 
-	filters = make(config.CommandFilter)
-	webRoutes = make(config.WebRoutes)
-
-	// Connecting to Twitch
-	if config.BotConfig.Cred.IsAuth {
-		config.BotConfig.TwitchC = twitch.NewClient(mainChan, config.BotConfig.Cred.Token)
+	BotConfig.Cred.IsAuth = false
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	err = viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %s", err))
+	}
+	if !viper.IsSet("Twitch.Channel") {
+		panic(fmt.Errorf("variable Twitch Channel must be defined in configuration"))
 	} else {
-		// No credentials provided, anon connection
-		config.BotConfig.TwitchC = twitch.NewAnonymousClient()
+		BotConfig.Cred.Channel = viper.GetString("Twitch.Channel")
+	}
+	if viper.IsSet("Twitch.Token") {
+		BotConfig.Cred.IsAuth = true
+		BotConfig.Cred.Token = viper.GetString("Twitch.Token")
 	}
 
-	// Adding filters & endpoints
-	// Dice Module
-	dice.Initialize()
-	for filter, modFunction := range dice.Filters {
-		filters[filter] = modFunction
+	if viper.IsSet("Aggreg.StackSize") {
+		BotConfig.Aggreg.StackSize = viper.GetInt("Aggreg.StackSize")
+	} else {
+		BotConfig.Aggreg.StackSize = 60
+	}
+	if viper.IsSet("Aggreg.Channels") {
+		BotConfig.Aggreg.Channels = viper.GetStringSlice("Aggreg.Channels")
 	}
 
-	// Aggregator Module
-	aggregator.Initialize()
-	for filter, modFunction := range aggregator.Filters {
-		filters[filter] = modFunction
+	if viper.IsSet("Http.Port") {
+		BotConfig.BotServer.Port = viper.GetInt("Http.Port")
+	} else {
+		BotConfig.BotServer.Port = 8090
 	}
-	for route, routeDetails := range aggregator.WebRoutes {
-		webRoutes[route] = config.WebTarget{
-			RouteFunc: routeDetails.RouteFunc,
-			RouteDesc: routeDetails.RouteDesc,
-		}
-		http.HandleFunc(route, getPage)
+	if viper.IsSet("Http.URL") {
+		BotConfig.BotServer.URL = viper.GetString("Http.URL")
 	}
-
-	// GiveAway Module
-	giveaway.Initialize()
-	for filter, modFunction := range giveaway.Filters {
-		filters[filter] = modFunction
-	}
-	for route, routeDetails := range giveaway.WebRoutes {
-		webRoutes[route] = config.WebTarget{
-			RouteFunc: routeDetails.RouteFunc,
-			RouteDesc: routeDetails.RouteDesc,
-		}
-		http.HandleFunc(route, getPage)
+	// Opening DB
+	BotConfig.DataStore, err = bolt.Open("twitchbot.db", 0600, nil)
+	if err != nil {
+		panic(fmt.Errorf("can't open BoltDB: %s", err))
 	}
 
-	// Polls Module
-	polls.Initialize()
-	for filter, modFunction := range polls.Filters {
-		filters[filter] = modFunction
-	}
-	for route, routeDetails := range polls.WebRoutes {
-		webRoutes[route] = config.WebTarget{
-			RouteFunc: routeDetails.RouteFunc,
-			RouteDesc: routeDetails.RouteDesc,
-		}
-		http.HandleFunc(route, getPage)
-	}
-
-	// Webroot
-	webRoutes["/"] = config.WebTarget{
-		RouteFunc: getHome,
-		RouteDesc: "Home",
-	}
-	http.HandleFunc("/", getPage)
+	// Intercepting Ctrl+C to close DB properly
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		BotConfig.DataStore.Close()
+		os.Exit(0)
+	}()
 }
 
 func getHome(req *http.Request) (body string) {
@@ -104,11 +79,11 @@ func getHome(req *http.Request) (body string) {
 }
 
 func pushAndSay(data string) {
-	config.BotConfig.TwitchC.Say(mainChan, data)
+	BotConfig.TwitchC.Say(BotConfig.Cred.Channel, data)
 }
 
 func getPage(w http.ResponseWriter, req *http.Request) {
-	for route, routeDetails := range webRoutes {
+	for route, routeDetails := range WebRoutes {
 		if req.RequestURI == route {
 			servePage(w, routeDetails.RouteFunc(req))
 			break
@@ -144,7 +119,7 @@ func getNavigation() string {
 	<div class="collapse navbar-collapse" id="navbarNav">
 		<ul class="navbar-nav">
 `)
-	for route, routeDetails := range webRoutes {
+	for route, routeDetails := range WebRoutes {
 		navigation += "<li class=\"nav-item\">" + fmt.Sprintf("<a href=\"%s\">%s</a>", route, routeDetails.RouteDesc) + "</li>"
 	}
 	navigationFooter := heredoc.Doc(`
@@ -156,30 +131,54 @@ func getNavigation() string {
 }
 
 func parseMessage(message twitch.PrivateMessage) {
-	if config.BotConfig.Cred.IsAuth {
-		if message.Channel == mainChan {
-			// Command to process
-			for filter, modFunction := range filters {
-				found, _ := regexp.MatchString(filter, message.Message)
-				if found {
-					pushAndSay(modFunction(message))
+	if BotConfig.Cred.IsAuth {
+		// Command to process
+		for filter, filterDetails := range Filters {
+			found, _ := regexp.MatchString(filter, message.Message)
+			if found {
+				botProcess := filterDetails.FilterFunc(message)
+				if message.Channel == BotConfig.Cred.Channel {
+					pushAndSay(botProcess)
 				}
 			}
 		}
 	}
 }
 
-func main() {
-	// Starting web server as a Go Routine (background thread)
-	go http.ListenAndServe(config.BotConfig.BotServer.URL+":"+strconv.Itoa(config.BotConfig.BotServer.Port), nil)
+func initRoutes() {
+	for routePath := range WebRoutes {
+		http.HandleFunc(routePath, getPage)
+	}
+}
 
-	config.BotConfig.TwitchC.OnPrivateMessage(func(message twitch.PrivateMessage) {
+func main() {
+	// Connecting to Twitch
+	if BotConfig.Cred.IsAuth {
+		BotConfig.TwitchC = twitch.NewClient(BotConfig.Cred.Channel, BotConfig.Cred.Token)
+	} else {
+		// No credentials provided, anon connection
+		BotConfig.TwitchC = twitch.NewAnonymousClient()
+	}
+
+	// Registering Twitch IRC Client callback functions
+	BotConfig.TwitchC.OnPrivateMessage(func(message twitch.PrivateMessage) {
 		parseMessage(message)
 	})
 
-	config.BotConfig.TwitchC.Join(mainChan)
+	// Initializing modules needs to be done after TwitchConnect
+	initAggregator()
+	initDice()
+	initGiveAway()
+	initPolls()
 
-	err = config.BotConfig.TwitchC.Connect()
+	initRoutes()
+	// Starting web server as a Go Routine (background thread)
+	url := BotConfig.BotServer.URL + ":" + strconv.Itoa(BotConfig.BotServer.Port)
+	go http.ListenAndServe(url, nil)
+
+	BotConfig.TwitchC.Join(BotConfig.Cred.Channel)
+
+	BotConfig.TwitchC.Connect()
 	if err != nil {
 		panic(fmt.Errorf("can't connect to Twitch: %s", err))
 	}
