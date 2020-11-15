@@ -5,3 +5,14 @@ If Port is not defined in the config, it will use 8090 as default.
 
 # Functions
 * Aggregated messages (AggregChans array in the config.yml), go to http://[server]:Port/messages
+
+# Compilation
+First build assets with:
+```
+go-assets-builder includes layouts -o assets.go
+```
+
+Then you can build the bot with:
+```
+go build
+```
