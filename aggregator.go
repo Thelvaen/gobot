@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
@@ -23,8 +22,9 @@ func initAggregator() {
 	}
 
 	WebRoutes["/messages"] = WebTarget{
-		RouteFunc: getMessages,
-		RouteDesc: "Aggregateur",
+		RouteFunc:     getMessages,
+		RouteTemplate: "aggregator.html",
+		RouteDesc:     "Aggregateur",
 	}
 
 	for _, channel := range BotConfig.Aggreg.Channels {
@@ -33,7 +33,7 @@ func initAggregator() {
 }
 
 func pushMessage(message twitch.PrivateMessage) string {
-	data := fmt.Sprintf("#%s [%02d:%02d:%02d] &lt;%s&gt; %s", message.Channel, message.Time.Hour(), message.Time.Minute(), message.Time.Second(), message.User.Name, message.Message)
+	data := fmt.Sprintf("#%s [%02d:%02d:%02d] <%s> %s", message.Channel, message.Time.Hour(), message.Time.Minute(), message.Time.Second(), message.User.Name, message.Message)
 	if position >= BotConfig.Aggreg.StackSize {
 		messages[position] = data
 		for i := 0; i <= position-1; i++ {
@@ -46,22 +46,16 @@ func pushMessage(message twitch.PrivateMessage) string {
 	return ""
 }
 
-func getMessages(req *http.Request) (body string) {
-	reloadScript := heredoc.Doc(`
-<script type="text/javascript" language="javascript">
-setTimeout(function(){
-	window.location.reload(1);
-}, 5000);
-</script>
-	`)
-	body = "<h1>"
+func getMessages(req *http.Request) map[string][]string {
+	data := map[string][]string{
+		"Channels": {},
+		"Messages": {},
+	}
 	for _, channel := range BotConfig.Aggreg.Channels {
-		body += channel + " "
+		data["Channels"] = append(data["Channels"], channel)
 	}
-	body += BotConfig.Cred.Channel + "</h1><ul>"
 	for i := 0; i < position; i++ {
-		body += "<li>" + messages[i] + "</li>\n"
+		data["Messages"] = append(data["Messages"], messages[i])
 	}
-	body += "</ul>" + reloadScript
-	return
+	return data
 }

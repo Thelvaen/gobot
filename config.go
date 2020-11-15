@@ -20,7 +20,9 @@ var (
 // WebTarget defines WebFunction & Description
 type WebTarget struct {
 	// RouteFunc gives the module function to be called
-	RouteFunc func(*http.Request) string
+	RouteFunc func(*http.Request) map[string][]string
+	// RouteTemplate indicates the template to use
+	RouteTemplate string
 	// RouteDesc gives the route description
 	RouteDesc string
 }

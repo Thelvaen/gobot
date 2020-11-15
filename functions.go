@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"unicode"
 )
@@ -28,4 +29,8 @@ func inArray(needle interface{}, haystack interface{}) (exists bool) {
 		}
 	}
 	return
+}
+
+func myPanic(message string, theError error) {
+	panic(fmt.Errorf(message, theError))
 }

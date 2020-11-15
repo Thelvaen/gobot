@@ -15,10 +15,10 @@ func initPolls() {
 		FilterFunc: registerVote,
 		FilterDesc: "Register your vote",
 	}
-	WebRoutes["/polls"] = WebTarget{
+	/*WebRoutes["/polls"] = WebTarget{
 		RouteFunc: getVoteForm,
 		RouteDesc: "Sondages",
-	}
+	}*/
 }
 
 func registerVote(message twitch.PrivateMessage) (outMessage string) {

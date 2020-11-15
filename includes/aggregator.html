@@ -1,0 +1,17 @@
+{{define "content"}}
+    <script type="text/javascript" language="javascript">
+    setTimeout(function(){
+        window.location.reload(1);
+    }, 5000);
+    </script>
+    <h1>
+    {{range $channel := .Data.Channels}}
+        {{ . }}
+    {{end}}
+    {{ .MainChannel }}
+    </h1><ul>
+    {{range $message := .Data.Messages}}
+        <li>{{ . }}</li>
+    {{end}}
+    </ul>
+{{end}}

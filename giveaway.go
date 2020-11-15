@@ -15,10 +15,10 @@ func initGiveAway() {
 		FilterFunc: registerGiveAway,
 		FilterDesc: "Register your participation to a giveaway",
 	}
-	WebRoutes["/giveaway"] = WebTarget{
+	/*WebRoutes["/giveaway"] = WebTarget{
 		RouteFunc: getGiveAwayForm,
 		RouteDesc: "GiveAway",
-	}
+	}*/
 }
 
 func registerGiveAway(message twitch.PrivateMessage) (outMessage string) {
