@@ -5,13 +5,13 @@
     }, 5000);
     </script>
     <h1>
-    {{range $channel := .Data.Channels}}
-        {{ . }}
+    {{range $index, $channel := .Data.Channels}}
+        {{ $channel }}
     {{end}}
     {{ .MainChannel }}
     </h1><ul>
-    {{range $message := .Data.Messages}}
-        <li>{{ . }}</li>
+    {{range $index, $message := .Data.Messages}}
+        <li>{{ $message }}</li>
     {{end}}
     </ul>
 {{end}}

@@ -1,0 +1,19 @@
+{{define "content"}}
+    <h1>Statistiques pour {{ .MainChannel }}</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">User</th>
+                <th scope="col">Score</th>
+            </tr>
+        </thead>
+        <tbody>
+    {{range $user, $score := .Data.Statistiques}}
+            <tr>
+                <td>{{ $user }}</td>
+                <td>{{ $score }}</td>
+            </tr>
+    {{end}}
+        </tbody>
+    </table>
+{{end}}

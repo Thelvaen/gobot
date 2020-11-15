@@ -50,12 +50,13 @@ func main() {
 	initDice()
 	initGiveAway()
 	initPolls()
+	initStats()
+
+	// Setting server in production mode
+	gin.SetMode(gin.ReleaseMode)
 
 	// Starting web server as a Go Routine (background thread)
 	server = gin.New()
-
-	// Setting server in production mode
-	//gin.SetMode(gin.ReleaseMode)
 
 	// Recovery middleware recovers from any panics and writes a 500 if there was one.
 	server.Use(gin.Recovery())

@@ -1,11 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/gempir/go-twitch-irc/v2"
-
-	bolt "go.etcd.io/bbolt"
 )
 
 var (
@@ -20,7 +19,7 @@ var (
 // WebTarget defines WebFunction & Description
 type WebTarget struct {
 	// RouteFunc gives the module function to be called
-	RouteFunc func(*http.Request) map[string][]string
+	RouteFunc func(*http.Request) map[string]map[string]string
 	// RouteTemplate indicates the template to use
 	RouteTemplate string
 	// RouteDesc gives the route description
@@ -52,7 +51,7 @@ type Configuration struct {
 	// Twitch Client store the Twitch Client interface
 	TwitchC *twitch.Client
 	// DataStore store the Database
-	DataStore *bolt.DB
+	DataStore *sql.DB
 }
 
 // Credentials define Credential struct

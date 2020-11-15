@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gempir/go-twitch-irc/v2"
 )
@@ -46,16 +47,18 @@ func pushMessage(message twitch.PrivateMessage) string {
 	return ""
 }
 
-func getMessages(req *http.Request) map[string][]string {
-	data := map[string][]string{
+func getMessages(req *http.Request) map[string]map[string]string {
+	data := map[string]map[string]string{
 		"Channels": {},
 		"Messages": {},
 	}
+	i := 0
 	for _, channel := range BotConfig.Aggreg.Channels {
-		data["Channels"] = append(data["Channels"], channel)
+		data["Channels"][strconv.Itoa(i)] = channel
+		i++
 	}
 	for i := 0; i < position; i++ {
-		data["Messages"] = append(data["Messages"], messages[i])
+		data["Messages"][strconv.Itoa(i)] = messages[i]
 	}
 	return data
 }

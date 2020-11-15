@@ -32,5 +32,8 @@ func inArray(needle interface{}, haystack interface{}) (exists bool) {
 }
 
 func myPanic(message string, theError error) {
+	if BotConfig.DataStore != nil {
+		BotConfig.DataStore.Close()
+	}
 	panic(fmt.Errorf(message, theError))
 }

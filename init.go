@@ -1,12 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"os"
 	"os/signal"
 	"syscall"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
-	bolt "go.etcd.io/bbolt"
 )
 
 func init() {
@@ -48,9 +49,9 @@ func init() {
 		BotConfig.BotServer.URL = viper.GetString("Http.URL")
 	}
 	// Opening DB
-	BotConfig.DataStore, err = bolt.Open("twitchbot.db", 0600, nil)
+	BotConfig.DataStore, err = sql.Open("sqlite3", "twitchbot.db")
 	if err != nil {
-		myPanic("can't open BoltDB: %s", err)
+		myPanic("can't open Sqlite3 DB : %s", err)
 	}
 
 	// Intercepting Ctrl+C to close DB properly
