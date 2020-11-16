@@ -13,7 +13,6 @@ var (
 func initGiveAway() {
 	Filters["!jeveux"] = CLIFilter{
 		FilterFunc: registerGiveAway,
-		FilterDesc: "Register your participation to a giveaway",
 	}
 	/*WebRoutes["/giveaway"] = WebTarget{
 		RouteFunc: getGiveAwayForm,

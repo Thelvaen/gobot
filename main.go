@@ -3,9 +3,13 @@ package main
 import (
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/thelvaen/gobot/csrf"
 )
 
 var (
@@ -39,13 +43,13 @@ func main() {
 		// No credentials provided, anon connection
 		BotConfig.TwitchC = twitch.NewAnonymousClient()
 	}
-
 	// Registering Twitch IRC Client callback functions
 	BotConfig.TwitchC.OnPrivateMessage(func(message twitch.PrivateMessage) {
 		parseMessage(message)
 	})
 
 	// Initializing modules needs to be done after TwitchConnect
+	initAuth()
 	initAggregator()
 	initDice()
 	initGiveAway()
@@ -53,10 +57,22 @@ func main() {
 	initStats()
 
 	// Setting server in production mode
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 
 	// Starting web server as a Go Routine (background thread)
 	server = gin.New()
+
+	//store := cookie.NewStore([]byte(BotConfig.Cred.Channel + strconv.Itoa(time.Now().Nanosecond())))
+	store := cookie.NewStore([]byte(BotConfig.Cred.Channel))
+	server.Use(sessions.Sessions("mysession", store))
+
+	server.Use(csrf.Middleware(csrf.Options{
+		Secret: BotConfig.Cred.Channel + strconv.Itoa(time.Now().Nanosecond()),
+		ErrorFunc: func(c *gin.Context) {
+			c.String(400, "CSRF token mismatch")
+			c.Abort()
+		},
+	}))
 
 	// Recovery middleware recovers from any panics and writes a 500 if there was one.
 	server.Use(gin.Recovery())

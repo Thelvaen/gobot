@@ -3,7 +3,6 @@ package main
 import (
 	"html/template"
 	"io/ioutil"
-	"net/http"
 	"strings"
 
 	"github.com/gin-contrib/multitemplate"
@@ -54,24 +53,4 @@ func createMyRender() (renderer multitemplate.Renderer) {
 		renderer.Add(name, tmpl)
 	}
 	return
-}
-
-func initRoutes() {
-	for routePath := range WebRoutes {
-		server.GET(routePath, servePage)
-	}
-}
-
-func servePage(c *gin.Context) {
-	for route, routeDetails := range WebRoutes {
-		if c.Request.RequestURI != route {
-			continue
-		}
-		data := routeDetails.RouteFunc(c.Request)
-		c.HTML(http.StatusOK, routeDetails.RouteTemplate, gin.H{
-			"MainChannel": BotConfig.Cred.Channel,
-			"WebRoutes":   WebRoutes,
-			"Data":        data,
-		})
-	}
 }

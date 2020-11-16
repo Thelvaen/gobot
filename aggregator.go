@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -19,13 +20,6 @@ func initAggregator() {
 
 	Filters[".*"] = CLIFilter{
 		FilterFunc: pushMessage,
-		FilterDesc: "Get every message to aggregator",
-	}
-
-	WebRoutes["/messages"] = WebTarget{
-		RouteFunc:     getMessages,
-		RouteTemplate: "aggregator.html",
-		RouteDesc:     "Aggregateur",
 	}
 
 	for _, channel := range BotConfig.Aggreg.Channels {
@@ -47,7 +41,7 @@ func pushMessage(message twitch.PrivateMessage) string {
 	return ""
 }
 
-func getMessages(req *http.Request) map[string]map[string]string {
+func getMessages(c *gin.Context) {
 	data := map[string]map[string]string{
 		"Channels": {},
 		"Messages": {},
@@ -60,5 +54,9 @@ func getMessages(req *http.Request) map[string]map[string]string {
 	for i := 0; i < position; i++ {
 		data["Messages"][strconv.Itoa(i)] = messages[i]
 	}
-	return data
+	c.HTML(http.StatusOK, "aggregator.html", gin.H{
+		"MainChannel": BotConfig.Cred.Channel,
+		"WebRoutes":   WebRoutes,
+		"Data":        data,
+	})
 }

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 )
@@ -49,7 +49,8 @@ func init() {
 		BotConfig.BotServer.URL = viper.GetString("Http.URL")
 	}
 	// Opening DB
-	BotConfig.DataStore, err = sql.Open("sqlite3", "twitchbot.db")
+	BotConfig.DataStore, err = gorm.Open("sqlite3", "twitchbot.db")
+	//BotConfig.DataStore.LogMode(true)
 	if err != nil {
 		myPanic("can't open Sqlite3 DB : %s", err)
 	}

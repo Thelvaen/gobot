@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -14,32 +16,27 @@ var (
 	statement *sql.Stmt
 )
 
+// Stats structure made exportable to be used with Gorm ORM
+type Stats struct {
+	ID    int    `gorm:"AUTO_INCREMENT"`
+	User  string `gorm:"not null;unique"` // Utilisateur unique!
+	Score int    `gorm:"not null;`
+}
+
 func initStats() {
 	messages = make([]string, BotConfig.Aggreg.StackSize+10)
 
 	Filters[".*"] = CLIFilter{
 		FilterFunc: pushStats,
-		FilterDesc: "Get every message to stats",
 	}
 
 	Filters["^!score$"] = CLIFilter{
 		FilterFunc: getCliStats,
-		FilterDesc: "Output messages to the chan",
 	}
 
-	WebRoutes["/stats"] = WebTarget{
-		RouteFunc:     getStats,
-		RouteTemplate: "stats.html",
-		RouteDesc:     "Statistiques",
+	if !BotConfig.DataStore.HasTable(&Stats{}) {
+		BotConfig.DataStore.CreateTable(&Stats{})
 	}
-
-	// Creating Stats bucket
-	createStatsTable := `CREATE TABLE IF NOT EXISTS stats (
-		id INTEGER PRIMARY KEY,
-		user TEXT NOT NULL,
-		score INTEGER NOT NULL
-		);`
-	BotConfig.DataStore.Exec(createStatsTable)
 }
 
 func pushStats(message twitch.PrivateMessage) string {
@@ -53,27 +50,18 @@ func pushStats(message twitch.PrivateMessage) string {
 		return ""
 	}
 
-	var currentScore int
-	statement, err = BotConfig.DataStore.Prepare("SELECT score FROM stats WHERE user = ?")
-	defer statement.Close()
-	if err != nil {
-		myPanic("error while preparing statement: ", err)
+	var stats Stats
+
+	stats.User = message.User.Name
+	err = BotConfig.DataStore.Where("user = ?", stats.User).First(&stats).Error
+	if err == gorm.ErrRecordNotFound {
+		stats.Score = 1
+		BotConfig.DataStore.Create(&stats)
 	}
-	err = statement.QueryRow(message.User.Name).Scan(&currentScore)
-	if err == sql.ErrNoRows {
-		statement, err = BotConfig.DataStore.Prepare("INSERT INTO stats(user, score) values(?, ?)")
-		if err != nil {
-			myPanic("error inserting initial data: ", err)
-		}
-		statement.Exec(message.User.Name, 0)
-		currentScore = 0
+	if err == nil {
+		stats.Score++
+		BotConfig.DataStore.Save(&stats)
 	}
-	if err != nil && err != sql.ErrNoRows {
-		myPanic("error while fetching data: ", err)
-	}
-	currentScore++
-	statement, err = BotConfig.DataStore.Prepare("UPDATE stats SET score = ? WHERE user = ?")
-	statement.Exec(currentScore, message.User.Name)
 
 	return ""
 }
@@ -84,37 +72,30 @@ func getCliStats(message twitch.PrivateMessage) string {
 		return ""
 	}
 
-	var currentScore int
-	statement, err = BotConfig.DataStore.Prepare("SELECT score FROM stats WHERE user = ?")
-	defer statement.Close()
-	if err != nil {
-		myPanic("error while preparing statement: ", err)
-	}
-	err = statement.QueryRow(message.User.Name).Scan(&currentScore)
-	if err == sql.ErrNoRows {
-		statement, err = BotConfig.DataStore.Prepare("INSERT INTO stats(user, score) values(?, ?)")
-		if err != nil {
-			myPanic("error inserting initial data: ", err)
-		}
-		statement.Exec(message.User.Name, 0)
-		currentScore = 0
-	}
+	var stats Stats
 
-	return "Ton score est : " + strconv.Itoa(currentScore)
+	stats.User = message.User.Name
+	err = BotConfig.DataStore.Where("user = ?", stats.User).First(&stats).Error
+
+	return "Ton score est : " + strconv.Itoa(stats.Score)
 }
 
-func getStats(req *http.Request) map[string]map[string]string {
-	var rows *sql.Rows
+func getStats(c *gin.Context) {
+	var stats []Stats
 	data := map[string]map[string]string{
 		"Statistiques": {},
 	}
-	rows, err = BotConfig.DataStore.Query("SELECT user, score FROM stats")
-	defer rows.Close()
-	for rows.Next() {
-		var user string
-		var score int
-		err = rows.Scan(&user, &score)
-		data["Statistiques"][user] = strconv.Itoa(score)
+
+	result := BotConfig.DataStore.Find(&stats)
+
+	if result.Error == nil {
+		for _, row := range stats {
+			data["Statistiques"][row.User] = strconv.Itoa(row.Score)
+		}
 	}
-	return data
+	c.HTML(http.StatusOK, "stats.html", gin.H{
+		"MainChannel": BotConfig.Cred.Channel,
+		"WebRoutes":   WebRoutes,
+		"Data":        data,
+	})
 }

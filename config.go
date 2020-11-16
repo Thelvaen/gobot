@@ -1,10 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/jinzhu/gorm"
 )
 
 var (
@@ -31,7 +31,6 @@ type CLIFilter struct {
 	// RouteFunc gives the module function to be called
 	FilterFunc func(twitch.PrivateMessage) string
 	// RouteDesc gives the route description
-	FilterDesc string
 }
 
 // FiltersT is the map used to store regex & function to parse them
@@ -51,7 +50,7 @@ type Configuration struct {
 	// Twitch Client store the Twitch Client interface
 	TwitchC *twitch.Client
 	// DataStore store the Database
-	DataStore *sql.DB
+	DataStore *gorm.DB
 }
 
 // Credentials define Credential struct

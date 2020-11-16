@@ -13,7 +13,6 @@ var (
 func initPolls() {
 	Filters["!vote"] = CLIFilter{
 		FilterFunc: registerVote,
-		FilterDesc: "Register your vote",
 	}
 	/*WebRoutes["/polls"] = WebTarget{
 		RouteFunc: getVoteForm,
