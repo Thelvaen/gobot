@@ -11,9 +11,10 @@ var (
 )
 
 func initGiveAway() {
-	Filters["!jeveux"] = CLIFilter{
-		FilterFunc: registerGiveAway,
-	}
+	Filters = append(Filters, CLIFilter{
+		FilterFunc:  registerGiveAway,
+		FilterRegEx: "^!jeveux$",
+	})
 	/*WebRoutes["/giveaway"] = WebTarget{
 		RouteFunc: getGiveAwayForm,
 		RouteDesc: "GiveAway",

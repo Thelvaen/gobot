@@ -16,4 +16,5 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/utrack/gin-csrf v0.0.0-20190424104817-40fb8d2c8fca
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9
+	gorm.io/gorm v1.20.6
 )

@@ -28,13 +28,14 @@ type WebTarget struct {
 
 // CLIFilter defines a filter applied to IRC Chat and function to be called
 type CLIFilter struct {
-	// RouteFunc gives the module function to be called
+	// FilterFunc gives the module function to be called
 	FilterFunc func(twitch.PrivateMessage) string
-	// RouteDesc gives the route description
+	// FilterRegEx gives the RegEx to apply
+	FilterRegEx string
 }
 
 // FiltersT is the map used to store regex & function to parse them
-type FiltersT map[string]CLIFilter
+type FiltersT []CLIFilter
 
 // WebRoutesT is the map used to store routes & function to process them
 type WebRoutesT map[string]WebTarget

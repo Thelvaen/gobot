@@ -1,5 +1,6 @@
 .vscode/*
 config.yml
+init.yml
 gobot.exe
 gobot
 *.db

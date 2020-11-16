@@ -14,32 +14,31 @@ var (
 )
 
 func initDice() {
-	Filters["^!dice$"] = CLIFilter{
-		FilterFunc: RollDice,
-	}
+	Filters = append(Filters, CLIFilter{
+		FilterFunc:  RollDice,
+		FilterRegEx: "^!dice$",
+	})
 
-	Filters["^!dice \\d*$"] = CLIFilter{
-		FilterFunc: RollDice,
-	}
+	Filters = append(Filters, CLIFilter{
+		FilterFunc:  RollDice,
+		FilterRegEx: "^!dice \\d*$",
+	})
 
-	Filters["^!rand \\d*$"] = CLIFilter{
-		FilterFunc: RollRand,
-	}
+	Filters = append(Filters, CLIFilter{
+		FilterFunc:  RollRand,
+		FilterRegEx: "^!rand \\d*$",
+	})
 	randomSource = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
 // RollDice called by the bot when rolling a dice
 func RollDice(message twitch.PrivateMessage) (dice string) {
 	// Rolling a dice
-	dice = "J'ai beau essayer, ça je ne vois absolument pas comment faire sans casser toutes les lois de la physique"
 	faces := 10
 
 	command := strings.Fields(message.Message)
 
 	if len(command) > 1 {
-		if (len(command[1]) > 0) && !isInt(command[1]) {
-			return
-		}
 		faces, _ = strconv.Atoi(command[1])
 		des := []int{2, 3, 4, 6, 8, 10, 12, 16, 20, 24, 100}
 		if !inArray(faces, des) {
@@ -51,7 +50,7 @@ func RollDice(message twitch.PrivateMessage) (dice string) {
 	return
 }
 
-// RollDice called by the bot when rolling a dice
+// RollRand called by the bot when rolling a dice
 func RollRand(message twitch.PrivateMessage) (dice string) {
 	// Rolling a dice
 	dice = "J'ai beau essayer, ça je ne vois absolument pas comment faire sans casser toutes les lois de la physique"

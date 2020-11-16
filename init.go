@@ -12,7 +12,7 @@ import (
 
 func init() {
 	WebRoutes = make(WebRoutesT)
-	Filters = make(FiltersT)
+	//Filters = make(FiltersT)
 
 	BotConfig.Cred.IsAuth = false
 	viper.SetConfigName("config")
@@ -34,7 +34,7 @@ func init() {
 	if viper.IsSet("Aggreg.StackSize") {
 		BotConfig.Aggreg.StackSize = viper.GetInt("Aggreg.StackSize")
 	} else {
-		BotConfig.Aggreg.StackSize = 60
+		BotConfig.Aggreg.StackSize = 40
 	}
 	if viper.IsSet("Aggreg.Channels") {
 		BotConfig.Aggreg.Channels = viper.GetStringSlice("Aggreg.Channels")

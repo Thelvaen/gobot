@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"unicode"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func isInt(s string) bool {
@@ -38,9 +36,4 @@ func myPanic(message string, theError error) {
 		BotConfig.DataStore.Close()
 	}
 	panic(fmt.Errorf(message, theError))
-}
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
 }

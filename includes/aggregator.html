@@ -1,17 +1,39 @@
 {{define "content"}}
-    <script type="text/javascript" language="javascript">
-    setTimeout(function(){
-        window.location.reload(1);
-    }, 5000);
-    </script>
     <h1>
-    {{range $index, $channel := .Data.Channels}}
+    {{range $index, $channel := .Channels}}
         {{ $channel }}
     {{end}}
     {{ .MainChannel }}
-    </h1><ul>
-    {{range $index, $message := .Data.Messages}}
-        <li>{{ $message }}</li>
-    {{end}}
-    </ul>
+    </h1>
+        <table id="messages">
+        <thead>
+            <tr>
+                <th data-field="Channel">Channel</th>
+                <th data-field="Time">Time</th>
+                <th data-field="User.DisplayName">User</th>
+                <th data-field="Message">Message</th>
+            </tr>
+        </thead>
+    </table>
+    <script src="https://unpkg.com/bootstrap-table@1.18.0/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.18.0/dist/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js"></script>
+    <script>
+$(document).ready(function(){
+    getMyData();
+//    setInterval( getMyData, 5000 );
+
+    setTimeout(function(){
+        window.location.reload(1);
+    }, 5000);
+});
+
+
+function getMyData() {
+    return $.getJSON( "http://localhost:8080/json/messages", function( messages ) {
+        $('#messages').bootstrapTable({
+            data: messages
+        });
+    });
+}
+    </script>
 {{end}}

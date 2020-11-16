@@ -23,8 +23,8 @@ func pushAndSay(data string) {
 func parseMessage(message twitch.PrivateMessage) {
 	if BotConfig.Cred.IsAuth {
 		// Command to process
-		for filter, filterDetails := range Filters {
-			found, _ := regexp.MatchString(filter, message.Message)
+		for _, filterDetails := range Filters {
+			found, _ := regexp.MatchString(filterDetails.FilterRegEx, message.Message)
 			if found {
 				botProcess := filterDetails.FilterFunc(message)
 				if message.Channel == BotConfig.Cred.Channel {
@@ -57,7 +57,7 @@ func main() {
 	initStats()
 
 	// Setting server in production mode
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 
 	// Starting web server as a Go Routine (background thread)
 	server = gin.New()

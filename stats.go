@@ -18,25 +18,23 @@ var (
 
 // Stats structure made exportable to be used with Gorm ORM
 type Stats struct {
-	ID    int    `gorm:"AUTO_INCREMENT"`
+	gorm.Model
 	User  string `gorm:"not null;unique"` // Utilisateur unique!
 	Score int    `gorm:"not null;`
 }
 
 func initStats() {
-	messages = make([]string, BotConfig.Aggreg.StackSize+10)
+	Filters = append(Filters, CLIFilter{
+		FilterFunc:  pushStats,
+		FilterRegEx: ".*",
+	})
 
-	Filters[".*"] = CLIFilter{
-		FilterFunc: pushStats,
-	}
+	Filters = append(Filters, CLIFilter{
+		FilterFunc:  getCliStats,
+		FilterRegEx: "^!score$",
+	})
 
-	Filters["^!score$"] = CLIFilter{
-		FilterFunc: getCliStats,
-	}
-
-	if !BotConfig.DataStore.HasTable(&Stats{}) {
-		BotConfig.DataStore.CreateTable(&Stats{})
-	}
+	BotConfig.DataStore.AutoMigrate(&Stats{})
 }
 
 func pushStats(message twitch.PrivateMessage) string {
