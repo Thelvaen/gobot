@@ -92,8 +92,7 @@ func getStats(c *gin.Context) {
 		}
 	}
 	c.HTML(http.StatusOK, "stats.html", gin.H{
-		"MainChannel": BotConfig.Cred.Channel,
-		"WebRoutes":   WebRoutes,
-		"Data":        data,
+		"Context": prepareContext(c),
+		"Data":    data,
 	})
 }

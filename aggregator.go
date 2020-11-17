@@ -45,10 +45,8 @@ func getMessagesForm(c *gin.Context) {
 		i++
 	}
 	c.HTML(http.StatusOK, "aggregator.html", gin.H{
-		"BaseURL":     baseURL(c),
-		"MainChannel": BotConfig.Cred.Channel,
-		"WebRoutes":   WebRoutes,
-		"Channels":    Channels,
+		"Context":  prepareContext(c),
+		"Channels": Channels,
 	})
 }
 

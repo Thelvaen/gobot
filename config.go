@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/jinzhu/gorm"
 )
@@ -12,19 +10,7 @@ var (
 	BotConfig Configuration
 	// Filters gives RegEx and function to call when matching
 	Filters FiltersT
-	// WebRoutes gives endpoints and function to call
-	WebRoutes WebRoutesT
 )
-
-// WebTarget defines WebFunction & Description
-type WebTarget struct {
-	// RouteFunc gives the module function to be called
-	RouteFunc func(*http.Request) map[string]map[string]string
-	// RouteTemplate indicates the template to use
-	RouteTemplate string
-	// RouteDesc gives the route description
-	RouteDesc string
-}
 
 // CLIFilter defines a filter applied to IRC Chat and function to be called
 type CLIFilter struct {
@@ -36,9 +22,6 @@ type CLIFilter struct {
 
 // FiltersT is the map used to store regex & function to parse them
 type FiltersT []CLIFilter
-
-// WebRoutesT is the map used to store routes & function to process them
-type WebRoutesT map[string]WebTarget
 
 // Configuration object
 type Configuration struct {

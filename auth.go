@@ -7,7 +7,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"github.com/thelvaen/gobot/csrf"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -74,7 +73,7 @@ func initAuth() {
 
 func loginHandlerForm(c *gin.Context) {
 	c.HTML(200, "login_form.html", gin.H{
-		"CSRF_Token": csrf.GetToken(c),
+		"Context": prepareContext(c),
 	})
 }
 
@@ -95,6 +94,7 @@ func loginHandler(c *gin.Context) {
 		if err := BotConfig.DataStore.Where("name = ?", user.Name).First(&user).Error; err == nil {
 			if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(clearPassword)); err == nil {
 				session.Set("userID", user.ID)
+				session.Set("userName", user.Name)
 				if err := session.Save(); err != nil {
 					c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 						"error": "Failed to save session",
@@ -113,4 +113,38 @@ func loginHandler(c *gin.Context) {
 
 func getNewUserToken(c *gin.Context) {
 	c.String(200, "test")
+}
+
+func getUserName(c *gin.Context) (userName interface{}) {
+	session := sessions.Default(c)
+	userName = session.Get("userName")
+	return
+}
+
+func isAuth(c *gin.Context) (auth bool) {
+	auth = false
+	session := sessions.Default(c)
+	userID := session.Get("userID")
+	if userID != nil {
+		auth = true
+	}
+	return
+}
+
+func isAdmin(c *gin.Context) (admin bool) {
+	admin = false
+	session := sessions.Default(c)
+	userID := session.Get("userID")
+	if userID == nil {
+		return
+	}
+	var user User
+	if err := BotConfig.DataStore.Preload("Roles").Where("ID = ?", userID).First(&user).Error; err == nil {
+		for _, role := range user.Roles {
+			if role.Name == "admin" {
+				admin = true
+			}
+		}
+	}
+	return
 }

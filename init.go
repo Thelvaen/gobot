@@ -11,9 +11,6 @@ import (
 )
 
 func init() {
-	WebRoutes = make(WebRoutesT)
-	//Filters = make(FiltersT)
-
 	BotConfig.Cred.IsAuth = false
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")

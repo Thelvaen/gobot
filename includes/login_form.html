@@ -10,7 +10,7 @@
             <input name="password" placeholder="Password..." class="form-password form-control" id="form-password" type="password" required>
         </div>
         <button type="submit" class="btn btn-primary">Se connecter</button>
-        <input type="hidden" name="_csrf" value="{{ .CSRF_Token }}" />
+        <input type="hidden" name="_csrf" value="{{ .Context.CSRFToken }}" />
     </form>
 </div>
 {{end}}
