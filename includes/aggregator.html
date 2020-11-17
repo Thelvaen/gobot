@@ -5,7 +5,7 @@
     {{end}}
     {{ .MainChannel }}
     </h1>
-        <table id="messages" data-url="http://localhost:8080/json/messages" data-auto-refresh="true" data-auto-refresh-interval="5">
+        <table id="messages" data-url="{{ .BaseURL }}/json/messages" data-auto-refresh="true" data-auto-refresh-interval="5">
         <thead>
             <tr>
                 <th data-field="Channel">Channel</th>
@@ -15,8 +15,8 @@
             </tr>
         </thead>
     </table>
-    <script src="https://unpkg.com/bootstrap-table@1.18.0/dist/bootstrap-table.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-table@1.18.0/dist/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js"></script>
+    <script src="{{ .BaseURL }}/static/js/bootstrap-table.min.js"></script>
+    <script src="{{ .BaseURL }}/static/js/bootstrap-table-auto-refresh.min.js"></script>
     <script>
     $(document).ready(function(){
         $('#messages').bootstrapTable();

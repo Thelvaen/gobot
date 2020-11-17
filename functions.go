@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
+	"strings"
 	"unicode"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +43,35 @@ func myPanic(message string, theError error) {
 }
 
 func baseURL(c *gin.Context) (url string) {
-	url = c.Request.URL.Scheme + "://" + c.Request.URL.Host
+	scheme := "http://"
+	if c.Request.TLS != nil {
+		scheme = "https://"
+	}
+	url = scheme + c.Request.Host
 	return
+}
+
+type binaryFileSystem struct {
+	fs http.FileSystem
+}
+
+func (b *binaryFileSystem) Open(name string) (http.File, error) {
+	return b.fs.Open(name)
+}
+
+func (b *binaryFileSystem) Exists(prefix string, filepath string) bool {
+
+	if p := strings.TrimPrefix(filepath, prefix); len(p) < len(filepath) {
+		if _, err := b.fs.Open(p); err != nil {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
+func binaryFS(root string) *binaryFileSystem {
+	return &binaryFileSystem{
+		AssetFile(),
+	}
 }

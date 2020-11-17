@@ -8,6 +8,7 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/thelvaen/gobot/csrf"
 )
@@ -48,14 +49,6 @@ func main() {
 		parseMessage(message)
 	})
 
-	// Initializing modules needs to be done after TwitchConnect
-	initAuth()
-	initAggregator()
-	initDice()
-	initGiveAway()
-	initPolls()
-	initStats()
-
 	// Setting server in production mode
 	gin.SetMode(gin.ReleaseMode)
 
@@ -79,6 +72,17 @@ func main() {
 
 	// Passing templates to gin-gonic web server
 	server.HTMLRender = createMyRender()
+
+	// Initializing modules needs to be done after TwitchConnect
+	initAuth()
+	initAggregator()
+	initDice()
+	initGiveAway()
+	initPolls()
+	initStats()
+
+	server.Use(static.Serve("/static", binaryFS("")))
+	//http.Handle("/static", http.FileServer(AssetFile()))
 
 	// Parsing routes to the server
 	initRoutes()
