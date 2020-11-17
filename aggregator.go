@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,7 +45,7 @@ func getMessagesForm(c *gin.Context) {
 		Channels[strconv.Itoa(i)] = channel
 		i++
 	}
-
+	fmt.Println(c.Request.URL.Scheme + "://" + c.Request.URL.Host + "/")
 	c.HTML(http.StatusOK, "aggregator.html", gin.H{
 		"MainChannel": BotConfig.Cred.Channel,
 		"WebRoutes":   WebRoutes,

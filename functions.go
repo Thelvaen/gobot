@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"unicode"
+
+	"github.com/gin-gonic/gin"
 )
 
 func isInt(s string) bool {
@@ -36,4 +38,9 @@ func myPanic(message string, theError error) {
 		BotConfig.DataStore.Close()
 	}
 	panic(fmt.Errorf(message, theError))
+}
+
+func baseURL(c *gin.Context) (url string) {
+	url = c.Request.URL.Scheme + "://" + c.Request.URL.Host
+	return
 }
