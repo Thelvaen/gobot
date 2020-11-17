@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -103,9 +102,9 @@ func loginHandler(c *gin.Context) {
 				}
 				c.Redirect(302, "/")
 				return
-			} else {
-				fmt.Println(fmt.Errorf("erreur de verification du password", err))
 			}
+			c.Redirect(302, "/login")
+			return
 		}
 	}
 

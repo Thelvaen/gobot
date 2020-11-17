@@ -20,7 +20,7 @@ var (
 type Stats struct {
 	gorm.Model
 	User  string `gorm:"not null;unique"` // Utilisateur unique!
-	Score int    `gorm:"not null;`
+	Score int    `gorm:"not null;"`
 }
 
 func initStats() {
