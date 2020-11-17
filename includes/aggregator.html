@@ -5,11 +5,11 @@
     {{end}}
     {{ .MainChannel }}
     </h1>
-        <table id="messages">
+        <table id="messages" data-url="http://localhost:8080/json/messages" data-auto-refresh="true" data-auto-refresh-interval="5">
         <thead>
             <tr>
                 <th data-field="Channel">Channel</th>
-                <th data-field="Time">Time</th>
+                <th data-field="Time" data-formatter="timeFormater">Time</th>
                 <th data-field="User.DisplayName">User</th>
                 <th data-field="Message">Message</th>
             </tr>
@@ -18,22 +18,35 @@
     <script src="https://unpkg.com/bootstrap-table@1.18.0/dist/bootstrap-table.min.js"></script>
     <script src="https://unpkg.com/bootstrap-table@1.18.0/dist/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js"></script>
     <script>
-$(document).ready(function(){
-    getMyData();
-//    setInterval( getMyData, 5000 );
-
-    setTimeout(function(){
-        window.location.reload(1);
-    }, 5000);
-});
-
-
-function getMyData() {
-    return $.getJSON( "http://localhost:8080/json/messages", function( messages ) {
-        $('#messages').bootstrapTable({
-            data: messages
-        });
+    $(document).ready(function(){
+        $('#messages').bootstrapTable();
     });
-}
+
+    /*function chanFormater(value) {
+        return '#' + value
+    }
+
+    function userFormater(value) {
+        return '&lt;' + value + '&gt;'
+    }*/
+
+    function timeFormater(value) {
+        var time = new Date(value);
+        h = time.getHours();
+        m = time.getMinutes();
+        s = time.getSeconds();
+
+        if (h < 10) {
+            h = '0' + h
+        }
+        if (m < 10) {
+            m = '0' + m
+        }
+        if (s < 10) {
+            s = '0' + s
+        }
+        return h + ':' + m + ':' + s
+    }
+
     </script>
 {{end}}
