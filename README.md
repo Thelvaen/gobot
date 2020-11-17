@@ -4,7 +4,10 @@ To get your oauth token, please go to https://twitchapps.com/tmi/ and click conn
 If Port is not defined in the config, it will use 8090 as default.
 
 # Functions
-* Aggregated messages (AggregChans array in the config.yml), go to http://[server]:Port/messages
+* user authentication, initial user must be provided in init.yml
+* Aggregated messages (AggregChans array in the config.yml), go to http://[server]:Port/auth/messages
+* Dice rolling (!dice/!dice XX/!rand XX)
+* Score for sentences that are longer than 10 chars (!score) or /auth/stats
 
 # Before you compile
 you need GCC installed on your system, as well as sqlite.so or sqlite.dll in your library path
