@@ -13,6 +13,6 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/spf13/viper v1.7.1
-	golang.org/x/crypto v0.0.0-20201116153603-4be66e5b6582
+	golang.org/x/crypto v0.0.0-20201117144127-c1f2f97bffc9
 	gorm.io/gorm v1.20.6
 )

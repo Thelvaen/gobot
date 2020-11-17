@@ -19,6 +19,10 @@ func initRoutes() {
 	adminGroup := server.Group("/admin")
 	adminGroup.Use(checkAdmin())
 	{
+		adminGroup.GET("/giveaway", getGiveAwayListForm)
+		adminGroup.POST("/giveaway", postGiveAwayList)
+		adminGroup.GET("/giveaway/:giveaway", getGiveAwayForm)
+		adminGroup.POST("/giveaway/:giveaway", postGiveAway)
 		adminGroup.GET("/registerUser", getNewUserToken)
 	}
 }

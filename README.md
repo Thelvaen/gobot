@@ -14,10 +14,22 @@ go get github.com/mattn/go-sqlite3
 go install github.com/mattn/go-sqlite3
 ```
 
+# Additional tools required :
+go-bindata & go-assets-builder need to be installed with the following commands (the ... are important)
+```
+go get -u github.com/go-bindata/go-bindata/...
+go get github.com/jessevdk/go-assets-builder
+```
+
 # Compilation
-First build assets with:
+First build templates with:
 ```
 go-assets-builder includes layouts -o assets.go
+```
+
+Then build static assets with (the ... are important):
+```
+go-bindata -fs -prefix "static/" -o bindata.go static/...
 ```
 
 Then you can build the bot with:

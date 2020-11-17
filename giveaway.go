@@ -1,9 +1,8 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -26,7 +25,18 @@ func registerGiveAway(message twitch.PrivateMessage) (outMessage string) {
 	return
 }
 
-func getGiveAwayForm(req *http.Request) (body string) {
-	body = "toto"
-	return
+func getGiveAwayListForm(c *gin.Context) {
+	c.String(200, "test")
+}
+
+func postGiveAwayList(c *gin.Context) {
+	c.String(200, "test")
+}
+
+func getGiveAwayForm(c *gin.Context) {
+	c.String(200, "test")
+}
+
+func postGiveAway(c *gin.Context) {
+	c.String(200, "test")
 }
