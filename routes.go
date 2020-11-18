@@ -65,5 +65,16 @@ func getNavigation(c *gin.Context) (navigation []route) {
 			Desc:  "Créer un Utilisateur",
 		})
 	}
+	if isAuth(c) {
+		navigation = append(navigation, route{
+			Route: "/logout",
+			Desc:  "Logout",
+		})
+	} else {
+		navigation = append(navigation, route{
+			Route: "/login",
+			Desc:  "Login",
+		})
+	}
 	return
 }

@@ -22,7 +22,6 @@
             {{ range $route, $routeDetails := .Context.Navigation }}
             <li class="nav-item"><a class="nav-link" href="{{ $routeDetails.Route }}">{{ $routeDetails.Desc }}</a></li>
             {{ end }}
-            <li class="nav-item"><a class="nav-link" href="{{ if .Context.UserName }}/logout{{ else }}/login{{ end }}">{{ if .Context.UserName }}Logout{{ else }}Login{{ end }}</a></li>
             </ul>
         </div>
     </nav>

@@ -3,21 +3,29 @@ package main
 import (
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 var (
 // Block var local
 )
 
+// GiveAway structure made exportable to be used with Gorm ORM
+type GiveAway struct {
+	gorm.Model
+	Name        string `gorm:"not null;unique"`
+	Description string
+	Status      bool
+	Users       []User
+}
+
 func initGiveAway() {
 	Filters = append(Filters, CLIFilter{
 		FilterFunc:  registerGiveAway,
 		FilterRegEx: "^!jeveux$",
 	})
-	/*WebRoutes["/giveaway"] = WebTarget{
-		RouteFunc: getGiveAwayForm,
-		RouteDesc: "GiveAway",
-	}*/
+
+	BotConfig.DataStore.AutoMigrate(&GiveAway{})
 }
 
 func registerGiveAway(message twitch.PrivateMessage) (outMessage string) {
