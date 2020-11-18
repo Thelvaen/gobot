@@ -110,8 +110,14 @@ func loginHandler(c *gin.Context) {
 
 }
 
+func createNewUserForm(c *gin.Context) {
+	c.HTML(200, "create_user_form.html", gin.H{
+		"Context": prepareContext(c),
+	})
+}
+
 func getNewUserToken(c *gin.Context) {
-	c.String(200, "test")
+
 }
 
 func getUserName(c *gin.Context) (userName interface{}) {

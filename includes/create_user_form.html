@@ -1,0 +1,16 @@
+{{define "content"}}
+<div class="form-bottom">
+    <form role="form" action="" method="post" class="login-form">
+        <div class="form-group">
+            <label for="form-username">Nom d'utilisateur</label>
+            <input name="username" placeholder="Username..." class="form-username form-control" id="form-username" type="text" required>
+        </div>
+        <div class="form-group">
+            <label for="form-email">email</label>
+            <input name="email" placeholder="email..." class="form-email form-control" id="form-email" type="text" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Créer l'utilisateur</button>
+        <input type="hidden" name="_csrf" value="{{ .Context.CSRFToken }}" />
+    </form>
+</div>
+{{end}}

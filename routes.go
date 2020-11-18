@@ -30,7 +30,8 @@ func initRoutes() {
 		adminGroup.POST("/poll", postPollList)
 		adminGroup.GET("/poll/:poll", getPollForm)
 		adminGroup.POST("/poll/:poll", postPoll)
-		adminGroup.GET("/registerUser", getNewUserToken)
+		adminGroup.GET("/registerUser", createNewUserForm)
+		adminGroup.POST("/registerUser", getNewUserToken)
 	}
 }
 
