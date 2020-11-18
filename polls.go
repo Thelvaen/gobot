@@ -18,11 +18,13 @@ type Poll struct {
 	Status      bool
 }
 
-// Vote struct allow to gives Roles to user
-type Vote struct {
+// PollOption struct allow to gives Roles to user
+type PollOption struct {
 	gorm.Model
-	User User
-	Poll Poll
+	Poll        Poll
+	Name        string
+	Description string
+	Users       []User
 }
 
 func initPolls() {
@@ -30,12 +32,8 @@ func initPolls() {
 		FilterFunc:  registerVote,
 		FilterRegEx: "!vote",
 	})
-	/*WebRoutes["/polls"] = WebTarget{
-		RouteFunc: getVoteForm,
-		RouteDesc: "Sondages",
-	}*/
 
-	BotConfig.DataStore.AutoMigrate(&Poll{}, &Vote{})
+	BotConfig.DataStore.AutoMigrate(&Poll{}, &PollOption{})
 }
 
 func registerVote(message twitch.PrivateMessage) (outMessage string) {
