@@ -1,18 +1,15 @@
-module github.com/thelvaen/gobot
+module github.com/thelvaen/gobotv2
 
 go 1.15
 
 require (
-	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5
-	github.com/gempir/go-twitch-irc/v2 v2.5.0
-	github.com/gin-contrib/multitemplate v0.0.0-20200916052041-666a7309d230
-	github.com/gin-contrib/sessions v0.0.3
-	github.com/gin-contrib/static v0.0.0-20200916080430-d45d9a37d28e
-	github.com/gin-gonic/gin v1.6.3
-	github.com/jessevdk/go-assets v0.0.0-20160921144138-4f4301a06e15
-	github.com/jinzhu/gorm v1.9.16
-	github.com/mattn/go-sqlite3 v1.14.5
-	github.com/spf13/viper v1.7.1
-	golang.org/x/crypto v0.0.0-20201117144127-c1f2f97bffc9
+	github.com/Joker/hpp v1.0.0 // indirect
+	github.com/gorilla/securecookie v1.1.1
+	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
+	github.com/kataras/iris/v12 v12.2.0-alpha.0.20201117050536-962ffd67721a
+	github.com/markbates/goth v1.66.0
+	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/smartystreets/goconvey v1.6.4 // indirect
+	github.com/yudai/pp v2.0.1+incompatible // indirect
 	gorm.io/gorm v1.20.6
 )
