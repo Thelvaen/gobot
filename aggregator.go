@@ -1,32 +1,28 @@
 package main
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/gin-gonic/gin"
+	"github.com/kataras/iris/v12"
+	"github.com/thelvaen/gobot/config"
 )
 
 var (
-	messages  []twitch.PrivateMessage
-	position  int
-	stackSize int
+	messages []twitch.PrivateMessage
 )
 
 func initAggregator() {
-	Filters = append(Filters, CLIFilter{
-		FilterFunc:  pushMessage,
-		FilterRegEx: ".*",
+	filters = append(filters, filter{
+		filterFunc:  pushMessage,
+		filterRegEx: ".*",
 	})
 
-	for _, channel := range BotConfig.Aggreg.Channels {
-		BotConfig.TwitchC.Join(channel)
+	for _, channel := range config.Aggreg.Channels {
+		twitchC.Join(channel)
 	}
 }
 
 func pushMessage(message twitch.PrivateMessage) string {
-	if len(messages) > BotConfig.Aggreg.StackSize {
+	if len(messages) > config.Aggreg.StackSize {
 		i := 0
 		copy(messages[i:], messages[i+1:])
 		//messages[len(messages)-1] = ""
@@ -36,20 +32,14 @@ func pushMessage(message twitch.PrivateMessage) string {
 	return ""
 }
 
-func getMessagesForm(c *gin.Context) {
-	Channels := make(map[string]string)
-	//Messages := make(map[string]string)
-	i := 0
-	for _, channel := range BotConfig.Aggreg.Channels {
-		Channels[strconv.Itoa(i)] = channel
-		i++
+func getMessagesPage(ctx iris.Context) {
+	if err := ctx.View("aggregator.html"); err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.Writef(err.Error())
 	}
-	c.HTML(http.StatusOK, "aggregator.html", gin.H{
-		"Context":  prepareContext(c),
-		"Channels": Channels,
-	})
 }
 
-func getMessagesData(c *gin.Context) {
-	c.JSON(200, messages)
+func getMessagesData(ctx iris.Context) {
+	options := iris.JSON{Indent: "", Secure: false}
+	ctx.JSON(messages, options)
 }

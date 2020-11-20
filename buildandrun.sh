@@ -12,9 +12,9 @@ else
     set GOARCH=amd64
 fi
 echo Building templates file
-go-assets-builder includes layouts -o assets.go
+go-bindata -fs -pkg templates -o templates/templates.go -prefix "html/templates/" html/templates/...
 echo Building static assets file
-go-bindata -fs -prefix "static/" -o bindata.go static/...
+go-bindata -fs -pkg static -o static/static.go -prefix "html/static/" html/static/...
 echo Compiling the bot
 time go build
 echo Starting the bot

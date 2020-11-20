@@ -1,0 +1,46 @@
+<h1>
+    {{range $index, $channel := .Channels}} {{ $channel }} {{end}} {{ .MainChannel }}
+</h1>
+<table id="messages" data-url="{{ .BaseURL }}/json/messages" data-auto-refresh="true" data-auto-refresh-interval="5">
+    <thead>
+        <tr>
+            <th data-field="Channel">Channel</th>
+            <th data-field="Time" data-formatter="timeFormater">Time</th>
+            <th data-field="User.DisplayName">User</th>
+            <th data-field="Message">Message</th>
+        </tr>
+    </thead>
+</table>
+<script src="{{ .BaseURL }}/static/js/bootstrap-table.min.js"></script>
+<script src="{{ .BaseURL }}/static/js/bootstrap-table-auto-refresh.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#messages').bootstrapTable();
+    });
+
+    /*function chanFormater(value) {
+        return '#' + value
+    }
+
+    function userFormater(value) {
+        return '&lt;' + value + '&gt;'
+    }*/
+
+    function timeFormater(value) {
+        var time = new Date(value);
+        h = time.getHours();
+        m = time.getMinutes();
+        s = time.getSeconds();
+
+        if (h < 10) {
+            h = '0' + h
+        }
+        if (m < 10) {
+            m = '0' + m
+        }
+        if (s < 10) {
+            s = '0' + s
+        }
+        return h + ':' + m + ':' + s
+    }
+</script>

@@ -4,11 +4,11 @@
 <head>
     <title>Twitch bot - {{ .MainChannel }}</title>
     <!-- CSS -->
-    <link rel="stylesheet" href="{{ .Context.BaseURL }}/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ .BaseURL }}/static/css/bootstrap.min.css">
 
     <!-- jQuery and JS bundle w/ Popper.js -->
-    <script src="{{ .Context.BaseURL }}/static/js/jquery.min.js"></script>
-    <script src="{{ .Context.BaseURL }}/static/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ .BaseURL }}/static/js/jquery.min.js"></script>
+    <script src="{{ .BaseURL }}/static/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -19,12 +19,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav navbar-right">
-            {{ range $route, $routeDetails := .Context.Navigation }}
-            <li class="nav-item"><a class="nav-link" href="{{ $routeDetails.Route }}">{{ $routeDetails.Desc }}</a></li>
-            {{ end }}
+                {{ range $route, $routeDetails := .Navigation }}
+                <li class="nav-item"><a class="nav-link" href="{{ $routeDetails.Route }}">{{ $routeDetails.Desc }}</a></li>
+                {{ end }}
             </ul>
         </div>
     </nav>
-    {{template "content" .}}
+    {{ yield }}
 </body>
+
 </html>

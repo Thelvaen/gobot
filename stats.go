@@ -2,43 +2,34 @@ package main
 
 import (
 	"database/sql"
-	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/kataras/iris/v12"
+	"github.com/thelvaen/gobot/config"
+	"github.com/thelvaen/gobot/models"
+	"gorm.io/gorm"
 )
 
 var (
 	statement *sql.Stmt
 )
 
-// Stats structure made exportable to be used with Gorm ORM
-type Stats struct {
-	gorm.Model
-	User  string `gorm:"not null;unique"` // Utilisateur unique!
-	Score int    `gorm:"not null;"`
-}
-
 func initStats() {
-	Filters = append(Filters, CLIFilter{
-		FilterFunc:  pushStats,
-		FilterRegEx: ".*",
+	filters = append(filters, filter{
+		filterFunc:  pushStats,
+		filterRegEx: ".*",
 	})
 
-	Filters = append(Filters, CLIFilter{
-		FilterFunc:  getCliStats,
-		FilterRegEx: "^!score$",
+	filters = append(filters, filter{
+		filterFunc:  getCliStats,
+		filterRegEx: "^!score$",
 	})
-
-	BotConfig.DataStore.AutoMigrate(&Stats{})
 }
 
 func pushStats(message twitch.PrivateMessage) string {
-	if message.Channel != BotConfig.Cred.Channel {
+	if message.Channel != config.Cred.Channel {
 		return ""
 	}
 	if len(message.Message) < 10 {
@@ -48,17 +39,17 @@ func pushStats(message twitch.PrivateMessage) string {
 		return ""
 	}
 
-	var stats Stats
+	var stats models.Stat
 
 	stats.User = message.User.Name
-	err = BotConfig.DataStore.Where("user = ?", stats.User).First(&stats).Error
+	err := dataStore.Where("user = ?", stats.User).First(&stats).Error
 	if err == gorm.ErrRecordNotFound {
 		stats.Score = 1
-		BotConfig.DataStore.Create(&stats)
+		dataStore.Create(&stats)
 	}
 	if err == nil {
 		stats.Score++
-		BotConfig.DataStore.Save(&stats)
+		dataStore.Save(&stats)
 	}
 
 	return ""
@@ -66,33 +57,36 @@ func pushStats(message twitch.PrivateMessage) string {
 
 func getCliStats(message twitch.PrivateMessage) string {
 	// Outputting stats to the channel
-	if message.Channel != BotConfig.Cred.Channel {
+	if message.Channel != config.Cred.Channel {
 		return ""
 	}
 
-	var stats Stats
+	var stats models.Stat
 
 	stats.User = message.User.Name
-	err = BotConfig.DataStore.Where("user = ?", stats.User).First(&stats).Error
-
+	err := dataStore.Where("user = ?", stats.User).First(&stats).Error
+	if err != nil {
+		return ""
+	}
 	return "Ton score est : " + strconv.Itoa(stats.Score)
 }
 
-func getStats(c *gin.Context) {
-	var stats []Stats
+func getStats(ctx iris.Context) {
+	var stats []models.Stat
 	data := map[string]map[string]string{
 		"Statistiques": {},
 	}
 
-	result := BotConfig.DataStore.Find(&stats)
+	result := dataStore.Find(&stats)
 
 	if result.Error == nil {
 		for _, row := range stats {
 			data["Statistiques"][row.User] = strconv.Itoa(row.Score)
 		}
 	}
-	c.HTML(http.StatusOK, "stats.html", gin.H{
-		"Context": prepareContext(c),
-		"Data":    data,
-	})
+	ctx.ViewData("Data", data)
+	if err := ctx.View("stats.html"); err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.Writef(err.Error())
+	}
 }

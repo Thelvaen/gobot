@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -14,19 +15,19 @@ var (
 )
 
 func initDice() {
-	Filters = append(Filters, CLIFilter{
-		FilterFunc:  RollDice,
-		FilterRegEx: "^!dice$",
+	filters = append(filters, filter{
+		filterFunc:  RollDice,
+		filterRegEx: "^!dice$",
 	})
 
-	Filters = append(Filters, CLIFilter{
-		FilterFunc:  RollDice,
-		FilterRegEx: "^!dice \\d*$",
+	filters = append(filters, filter{
+		filterFunc:  RollDice,
+		filterRegEx: "^!dice \\d*$",
 	})
 
-	Filters = append(Filters, CLIFilter{
-		FilterFunc:  RollRand,
-		FilterRegEx: "^!rand \\d*$",
+	filters = append(filters, filter{
+		filterFunc:  RollRand,
+		filterRegEx: "^!rand \\d*$",
 	})
 	randomSource = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
@@ -53,17 +54,26 @@ func RollDice(message twitch.PrivateMessage) (dice string) {
 // RollRand called by the bot when rolling a dice
 func RollRand(message twitch.PrivateMessage) (dice string) {
 	// Rolling a dice
-	dice = "J'ai beau essayer, ça je ne vois absolument pas comment faire sans casser toutes les lois de la physique"
-	faces := 100
-
 	command := strings.Fields(message.Message)
 
-	if len(command) > 1 {
-		if (len(command[1]) > 0) && !isInt(command[1]) {
-			return
-		}
-		faces, _ = strconv.Atoi(command[1])
-	}
+	faces, _ := strconv.Atoi(command[1])
+
 	dice = "* Choisi un nombre entre 1 et " + strconv.Itoa(faces) + " pour " + message.User.Name + " et obtient : " + strconv.Itoa(randomSource.Intn(faces)+1)
+	return
+}
+
+func inArray(needle interface{}, haystack interface{}) (exists bool) {
+	exists = false
+
+	switch reflect.TypeOf(haystack).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(haystack)
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(needle, s.Index(i).Interface()) == true {
+				exists = true
+				return
+			}
+		}
+	}
 	return
 }

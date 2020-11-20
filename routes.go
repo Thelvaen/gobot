@@ -1,81 +1,66 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	auth "github.com/thelvaen/iris-auth-gorm"
 
-func initRoutes() {
-	server.GET("/login", loginHandlerForm)
-	server.POST("/login", loginHandler)
-	server.GET("/logout", logoutHandler)
-	server.GET("/", getHome)
+	"github.com/thelvaen/gobot/config"
+	"github.com/thelvaen/gobot/static"
+	"github.com/thelvaen/gobot/templates"
 
-	authGroup := server.Group("/auth")
-	authGroup.Use(checkAuth())
-	{
-		authGroup.GET("/messages", getMessagesForm)
-		authGroup.GET("/stats", getStats)
-	}
-	jsonGroup := server.Group("/json")
-	jsonGroup.Use(checkAuth())
-	{
-		jsonGroup.GET("/messages", getMessagesData)
-	}
-	adminGroup := server.Group("/admin")
-	adminGroup.Use(checkAdmin())
-	{
-		adminGroup.GET("/giveaway", getGiveAwayListForm)
-		adminGroup.POST("/giveaway", postGiveAwayList)
-		adminGroup.GET("/giveaway/:giveaway", getGiveAwayForm)
-		adminGroup.POST("/giveaway/:giveaway", postGiveAway)
-		adminGroup.GET("/poll", getPollListForm)
-		adminGroup.POST("/poll", postPollList)
-		adminGroup.GET("/poll/:poll", getPollForm)
-		adminGroup.POST("/poll/:poll", postPoll)
-		adminGroup.GET("/registerUser", createNewUserForm)
-		adminGroup.POST("/registerUser", getNewUserToken)
-	}
-}
+	"github.com/iris-contrib/middleware/csrf"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/sessions"
 
-/*
-type route struct {
-	route string
-	desc  string
-}*/
+	"github.com/gorilla/securecookie"
+)
 
-func getNavigation(c *gin.Context) (navigation []route) {
-	if isAuth(c) {
-		navigation = append(navigation, route{
-			Route: "/auth/messages",
-			Desc:  "Aggregateur",
-		})
-		navigation = append(navigation, route{
-			Route: "/auth/stats",
-			Desc:  "Statistiques",
-		})
-	}
-	if isAdmin(c) {
-		navigation = append(navigation, route{
-			Route: "/admin/giveaway",
-			Desc:  "GiveAways",
-		})
-		navigation = append(navigation, route{
-			Route: "/admin/poll",
-			Desc:  "Sondages",
-		})
-		navigation = append(navigation, route{
-			Route: "/admin/registerUser",
-			Desc:  "Créer un Utilisateur",
-		})
-	}
-	if isAuth(c) {
-		navigation = append(navigation, route{
-			Route: "/logout",
-			Desc:  "Logout",
-		})
-	} else {
-		navigation = append(navigation, route{
-			Route: "/login",
-			Desc:  "Login",
-		})
-	}
-	return
+func webBot() *iris.Application {
+
+	// attach a session manager
+	sessionsManager = sessions.New(sessions.Config{
+		Cookie:                      config.Cred.Channel,
+		Encoding:                    securecookie.New(config.WebConf.HashKey, config.WebConf.BlockKey),
+		AllowReclaim:                true,
+		DisableSubdomainPersistence: true,
+	})
+
+	app := iris.New()
+	//app.Logger().SetLevel("debug")
+
+	// Adding sessions
+	app.Use(sessionsManager.Handler())
+
+	// Adding CSRF Middleware
+	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(false)))
+
+	// Adding auth Middleware
+	auth.SetDB(dataStore)
+	auth.RequireAuthRoute("/login")
+	app.Use(auth.Middleware)
+
+	// Adding context Middleware
+	app.Use(prepareContext)
+
+	// Adding templates & layouts
+	tmpl := iris.HTML(templates.AssetFile(), ".html").Reload(true)
+	tmpl.Layout("layouts/layout.html")
+	app.RegisterView(tmpl)
+
+	app.Get("/login", loginHandlerForm)
+	app.Get("/logout", logoutHandler)
+	app.Post("/login", loginHandler)
+	app.Get("/", func(ctx iris.Context) {
+		ctx.View("home.html")
+	})
+
+	// Adding routes
+	app.Get("/auth/messages", getMessagesPage)
+	app.Get("/json/messages", getMessagesData)
+
+	app.Get("/auth/stats", getStats)
+
+	// Adding static content
+	app.HandleDir("/static", static.AssetFile())
+
+	return app
 }
