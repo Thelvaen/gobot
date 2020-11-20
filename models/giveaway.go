@@ -10,5 +10,5 @@ type GiveAway struct {
 	Name        string `gorm:"not null;unique"`
 	Description string
 	Status      bool
-	Users       []User `gorm:"many2many:giveaway_user;"`
+	Users       []TwitchUser
 }

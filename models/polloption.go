@@ -10,5 +10,5 @@ type PollOption struct {
 	Poll        Poll `gorm:"foreignKey:ID"`
 	Name        string
 	Description string
-	Users       []User `gorm:"many2many:polloption_user;"`
+	Users       []TwitchUser
 }

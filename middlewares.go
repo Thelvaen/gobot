@@ -1,31 +1,13 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/iris-contrib/middleware/csrf"
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/sessions"
-	"github.com/thelvaen/gobot/models"
 )
 
 type route struct {
 	Route string
 	Desc  string
-}
-
-func startSession(ctx iris.Context) {
-	session := sessions.Get(ctx)
-	userID := session.Get("userID")
-	if userID == nil {
-		ctx.Next()
-	}
-	var user models.User
-	if err := dataStore.Preload("Roles").Where("ID = ?", userID).First(&user).Error; err == nil {
-		fmt.Println(ctx.SetUser(user))
-	}
-	fmt.Println(ctx.User())
-	ctx.Next()
 }
 
 func prepareContext(ctx iris.Context) {

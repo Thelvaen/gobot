@@ -1,6 +1,8 @@
 package main
 
 import (
+	auth "github.com/thelvaen/iris-auth-gorm"
+
 	"github.com/thelvaen/gobot/config"
 	"github.com/thelvaen/gobot/static"
 	"github.com/thelvaen/gobot/templates"
@@ -31,8 +33,10 @@ func webBot() *iris.Application {
 	// Adding CSRF Middleware
 	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(false)))
 
-	// Adding User Information Middleware
-	app.Use(startSession)
+	// Adding auth Middleware
+	auth.SetDB(dataStore)
+	auth.RequireAuthRoute("/login")
+	app.Use(auth.Middleware)
 
 	// Adding context Middleware
 	app.Use(prepareContext)

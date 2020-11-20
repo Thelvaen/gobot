@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/sessions"
-	"github.com/thelvaen/gobot/models"
-	"golang.org/x/crypto/bcrypt"
+	auth "github.com/thelvaen/iris-auth-gorm"
+	"github.com/thelvaen/iris-auth-gorm/models"
 )
 
 func loginHandlerForm(ctx iris.Context) {
@@ -22,7 +22,6 @@ func logoutHandler(ctx iris.Context) {
 }
 
 func loginHandler(ctx iris.Context) {
-	session := sessions.Get(ctx)
 	var user models.User
 
 	err := ctx.ReadForm(&user)
@@ -30,15 +29,5 @@ func loginHandler(ctx iris.Context) {
 		ctx.Redirect("/login", iris.StatusFound)
 		return
 	}
-	clearPassword := user.Password
-	if err := dataStore.Where("name = ?", user.Name).First(&user).Error; err == nil {
-		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(clearPassword)); err == nil {
-			session.Set("userID", user.ID)
-			ctx.Redirect("/", iris.StatusFound)
-			return
-		}
-		ctx.Redirect("/login", iris.StatusFound)
-		return
-	}
-
+	auth.Check(user, ctx)
 }
