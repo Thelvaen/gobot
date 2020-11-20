@@ -15,15 +15,11 @@ import (
 func webBot() *iris.Application {
 
 	// attach a session manager
-	cookieName := config.Cred.Channel
-	hashKey := securecookie.GenerateRandomKey(64)
-	blockKey := securecookie.GenerateRandomKey(32)
-	secureCookie := securecookie.New(hashKey, blockKey)
-
 	sessionsManager = sessions.New(sessions.Config{
-		Cookie:       cookieName,
-		Encoding:     secureCookie,
-		AllowReclaim: true,
+		Cookie:                      config.Cred.Channel,
+		Encoding:                    securecookie.New(config.WebConf.HashKey, config.WebConf.BlockKey),
+		AllowReclaim:                true,
+		DisableSubdomainPersistence: true,
 	})
 
 	app := iris.New()
@@ -34,6 +30,9 @@ func webBot() *iris.Application {
 
 	// Adding CSRF Middleware
 	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(false)))
+
+	// Adding User Information Middleware
+	app.Use(startSession)
 
 	// Adding context Middleware
 	app.Use(prepareContext)

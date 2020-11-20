@@ -1,9 +1,8 @@
 package main
 
 import (
-	"strconv"
-
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/sessions"
 	"github.com/thelvaen/gobot/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,11 +15,14 @@ func loginHandlerForm(ctx iris.Context) {
 }
 
 func logoutHandler(ctx iris.Context) {
-	ctx.SetCookieKV("userID", "", iris.CookieAllowSubdomains())
+	session := sessions.Get(ctx)
+	session.Delete("userID")
+	ctx.SetUser(nil)
 	ctx.Redirect("/", iris.StatusFound)
 }
 
 func loginHandler(ctx iris.Context) {
+	session := sessions.Get(ctx)
 	var user models.User
 
 	err := ctx.ReadForm(&user)
@@ -31,7 +33,7 @@ func loginHandler(ctx iris.Context) {
 	clearPassword := user.Password
 	if err := dataStore.Where("name = ?", user.Name).First(&user).Error; err == nil {
 		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(clearPassword)); err == nil {
-			ctx.SetCookieKV("userID", strconv.Itoa(int(user.ID)), iris.CookieAllowSubdomains())
+			session.Set("userID", user.ID)
 			ctx.Redirect("/", iris.StatusFound)
 			return
 		}
@@ -39,12 +41,4 @@ func loginHandler(ctx iris.Context) {
 		return
 	}
 
-}
-
-func isAuth(ctx iris.Context) bool {
-	return true
-}
-
-func isAdmin(ctx iris.Context) bool {
-	return true
 }

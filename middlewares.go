@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/iris-contrib/middleware/csrf"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/sessions"
+	"github.com/thelvaen/gobot/models"
 )
 
 type route struct {
@@ -10,16 +14,30 @@ type route struct {
 	Desc  string
 }
 
+func startSession(ctx iris.Context) {
+	session := sessions.Get(ctx)
+	userID := session.Get("userID")
+	if userID == nil {
+		ctx.Next()
+	}
+	var user models.User
+	if err := dataStore.Preload("Roles").Where("ID = ?", userID).First(&user).Error; err == nil {
+		fmt.Println(ctx.SetUser(user))
+	}
+	fmt.Println(ctx.User())
+	ctx.Next()
+}
+
 func prepareContext(ctx iris.Context) {
-	ctx.ViewData("UserName", getUserName(ctx))
+	ctx.ViewData("UserName", (ctx))
 	ctx.ViewData("BaseURL", baseURL(ctx))
-	ctx.ViewData("Navigation", getNavigation(ctx))
 	ctx.ViewData("CSRFToken", csrf.Token(ctx))
 	ctx.Next()
 }
 
-func getNavigation(ctx iris.Context) (navigation []route) {
-	if isAuth(ctx) {
+func getNavigation(ctx iris.Context) {
+	var navigation []route
+	if ctx.User() != nil {
 		navigation = append(navigation, route{
 			Route: "/auth/messages",
 			Desc:  "Aggregateur",
@@ -29,7 +47,7 @@ func getNavigation(ctx iris.Context) (navigation []route) {
 			Desc:  "Statistiques",
 		})
 	}
-	if isAdmin(ctx) {
+	/*if isAdmin(ctx) {
 		navigation = append(navigation, route{
 			Route: "/admin/giveaway",
 			Desc:  "GiveAways",
@@ -42,8 +60,8 @@ func getNavigation(ctx iris.Context) (navigation []route) {
 			Route: "/admin/registerUser",
 			Desc:  "Créer un Utilisateur",
 		})
-	}
-	if isAuth(ctx) {
+	}*/
+	if ctx.User() != nil {
 		navigation = append(navigation, route{
 			Route: "/logout",
 			Desc:  "Logout",
@@ -54,13 +72,10 @@ func getNavigation(ctx iris.Context) (navigation []route) {
 			Desc:  "Login",
 		})
 	}
-	return
+	ctx.ViewData("Navigation", navigation)
+	ctx.Next()
 }
 
 func baseURL(ctx iris.Context) string {
-	return ""
-}
-
-func getUserName(ctx iris.Context) string {
 	return ""
 }
