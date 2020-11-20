@@ -1,10 +1,16 @@
-# gobot
+# Gobot
+This is a full featured application (still in progress), hence, it is not intended to be imported in your project.
+
+# Twitch Authentification
 To get your oauth token, please go to https://twitchapps.com/tmi/ and click connect, then Copy/Paste your token in the Token field of the config.yml
 
-If Port is not defined in the config, it will use 8090 as default.
+# Configuration tips
+* If Port is not defined in the config, it will use 8090 as default,
+* Default stack size for aggregator is 60,
+* Cred/Channel must always be defined, as it gives the bot its main Channel for operation (as well as the Twitch ID to use when using oAuth),
 
 # Functions
-* user authentication, initial user must be provided in init.yml
+* user authentication, initial user must be provided in init.yml (broken since reworked to IRIS, not yet entirely fixed, and mliddleware to restrict access is not yet done),
 * Aggregated messages (AggregChans array in the config.yml), go to http://[server]:Port/auth/messages
 * Dice rolling (!dice/!dice XX/!rand XX)
 * Score for sentences that are longer than 10 chars (!score) or /auth/stats
@@ -18,21 +24,20 @@ go install github.com/mattn/go-sqlite3
 ```
 
 # Additional tools required :
-go-bindata & go-assets-builder need to be installed with the following commands (the ... are important)
+go-bindata need to be installed with the following commands (the ... are important)
 ```
 go get -u github.com/go-bindata/go-bindata/...
-go get github.com/jessevdk/go-assets-builder
 ```
 
 # Compilation
-First build templates with:
+First build templates with (the ... are important):
 ```
-go-assets-builder includes layouts -o assets.go
+go-bindata -fs -pkg templates -o templates/templates.go -prefix "html/templates/" html/templates/...
 ```
 
 Then build static assets with (the ... are important):
 ```
-go-bindata -fs -prefix "static/" -o bindata.go static/...
+go-bindata -fs -pkg static -o static/static.go -prefix "html/static/" html/static/...
 ```
 
 Then you can build the bot with:
