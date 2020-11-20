@@ -7,8 +7,8 @@ import (
 // PollOption struct allow to gives Roles to user
 type PollOption struct {
 	gorm.Model
-	Poll        Poll
+	Poll        Poll `gorm:"foreignKey:ID"`
 	Name        string
 	Description string
-	Users       []User
+	Users       []User `gorm:"many2many:polloption_user;"`
 }
