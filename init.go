@@ -26,8 +26,11 @@ func init() {
 	}
 
 	// Opening DB
-	dataStore, err = gorm.Open(sqlite.Open("twitchbot.db"), &gorm.Config{})
-	//dataStore.LogMode(true)
+	dbConf := gorm.Config{
+		FullSaveAssociations: true,
+		Logger:               nil,
+	}
+	dataStore, err = gorm.Open(sqlite.Open("twitchbot.db"), &dbConf)
 	if err != nil {
 		log.Fatalf("can't open Sqlite3 DB : %s", err)
 	}

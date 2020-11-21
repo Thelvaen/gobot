@@ -185,7 +185,7 @@ func cssBootstrapMinCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "css/bootstrap.min.css", size: 208821, mode: os.FileMode(420), modTime: time.Unix(1605823491, 0)}
+	info := bindataFileInfo{name: "css/bootstrap.min.css", size: 208821, mode: os.FileMode(420), modTime: time.Unix(1605896240, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -205,7 +205,7 @@ func jsBootstrapTableAutoRefreshMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/bootstrap-table-auto-refresh.min.js", size: 18865, mode: os.FileMode(420), modTime: time.Unix(1605823534, 0)}
+	info := bindataFileInfo{name: "js/bootstrap-table-auto-refresh.min.js", size: 18865, mode: os.FileMode(420), modTime: time.Unix(1605896240, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -225,7 +225,7 @@ func jsBootstrapTableMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/bootstrap-table.min.js", size: 160952, mode: os.FileMode(420), modTime: time.Unix(1605823582, 0)}
+	info := bindataFileInfo{name: "js/bootstrap-table.min.js", size: 160952, mode: os.FileMode(420), modTime: time.Unix(1605896240, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -245,7 +245,7 @@ func jsBootstrapMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/bootstrap.min.js", size: 84373, mode: os.FileMode(420), modTime: time.Unix(1605823593, 0)}
+	info := bindataFileInfo{name: "js/bootstrap.min.js", size: 84373, mode: os.FileMode(420), modTime: time.Unix(1605896240, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -265,7 +265,7 @@ func jsJqueryMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/jquery.min.js", size: 116357, mode: os.FileMode(420), modTime: time.Unix(1605823618, 0)}
+	info := bindataFileInfo{name: "js/jquery.min.js", size: 116357, mode: os.FileMode(420), modTime: time.Unix(1605896240, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -285,7 +285,7 @@ func jsProperMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/proper.min.js", size: 29470, mode: os.FileMode(420), modTime: time.Unix(1605823629, 0)}
+	info := bindataFileInfo{name: "js/proper.min.js", size: 29470, mode: os.FileMode(420), modTime: time.Unix(1605896240, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

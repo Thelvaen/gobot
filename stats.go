@@ -39,17 +39,15 @@ func pushStats(message twitch.PrivateMessage) string {
 		return ""
 	}
 
-	var stats models.Stat
+	var user models.TwitchUser
 
-	stats.User = message.User.Name
-	err := dataStore.Where("user = ?", stats.User).First(&stats).Error
+	err := dataStore.Preload("Statistique").Where("twitch_id = ?", message.User.ID).First(&user).Error
 	if err == gorm.ErrRecordNotFound {
-		stats.Score = 1
-		dataStore.Create(&stats)
+		updateTwitchUser(message.User)
 	}
 	if err == nil {
-		stats.Score++
-		dataStore.Save(&stats)
+		user.Statistique.Score++
+		dataStore.Session(&gorm.Session{FullSaveAssociations: true}).Save(&user)
 	}
 
 	return ""
@@ -61,27 +59,26 @@ func getCliStats(message twitch.PrivateMessage) string {
 		return ""
 	}
 
-	var stats models.Stat
+	var user models.TwitchUser
 
-	stats.User = message.User.Name
-	err := dataStore.Where("user = ?", stats.User).First(&stats).Error
+	err := dataStore.Preload("Statistique").Where("twitch_id = ?", message.User.ID).First(&user).Error
 	if err != nil {
 		return ""
 	}
-	return "Ton score est : " + strconv.Itoa(stats.Score)
+	return "Ton score est : " + strconv.Itoa(user.Statistique.Score)
 }
 
 func getStats(ctx iris.Context) {
-	var stats []models.Stat
+	var users []models.TwitchUser
 	data := map[string]map[string]string{
 		"Statistiques": {},
 	}
 
-	result := dataStore.Find(&stats)
+	result := dataStore.Preload("Statistique").Find(&users)
 
 	if result.Error == nil {
-		for _, row := range stats {
-			data["Statistiques"][row.User] = strconv.Itoa(row.Score)
+		for _, row := range users {
+			data["Statistiques"][row.DisplayName] = strconv.Itoa(row.Statistique.Score)
 		}
 	}
 	ctx.ViewData("Data", data)
