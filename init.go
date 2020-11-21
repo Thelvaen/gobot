@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/thelvaen/gobot/config"
-	"github.com/thelvaen/gobot/models"
+	"github.com/Thelvaen/gobot/config"
+	"github.com/Thelvaen/gobot/models"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

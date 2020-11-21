@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Thelvaen/gobot/config"
+	"github.com/Thelvaen/gobot/models"
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/kataras/iris/v12"
-	"github.com/thelvaen/gobot/config"
-	"github.com/thelvaen/gobot/models"
 	"gorm.io/gorm"
 )
 

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/thelvaen/iris-auth-gorm"
+	"github.com/Thelvaen/iris-auth-gorm"
 
-	"github.com/thelvaen/gobot/config"
-	"github.com/thelvaen/gobot/static"
-	"github.com/thelvaen/gobot/templates"
+	"github.com/Thelvaen/gobot/config"
+	"github.com/Thelvaen/gobot/static"
+	"github.com/Thelvaen/gobot/templates"
 
 	"github.com/iris-contrib/middleware/csrf"
 	"github.com/kataras/iris/v12"

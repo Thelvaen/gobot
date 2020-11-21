@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/Thelvaen/gobot/config"
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/kataras/iris/v12"
-	"github.com/thelvaen/gobot/config"
 )
 
 var (

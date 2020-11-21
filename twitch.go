@@ -3,9 +3,9 @@ package main
 import (
 	"regexp"
 
+	"github.com/Thelvaen/gobot/config"
+	"github.com/Thelvaen/gobot/models"
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/thelvaen/gobot/config"
-	"github.com/thelvaen/gobot/models"
 	"gorm.io/gorm"
 )
 
