@@ -78,7 +78,9 @@ func getStats(ctx iris.Context) {
 
 	if result.Error == nil {
 		for _, row := range users {
-			data["Statistiques"][row.DisplayName] = strconv.Itoa(row.Statistique.Score)
+			if row.Statistique.Score > 0 {
+				data["Statistiques"][row.DisplayName] = strconv.Itoa(row.Statistique.Score)
+			}
 		}
 	}
 	ctx.ViewData("Data", data)

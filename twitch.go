@@ -35,15 +35,22 @@ func updateTwitchUser(user twitch.User) {
 	}
 
 	err := dataStore.Where(&u).First(&u).Error
-
-	u.Name = user.Name
-	u.DisplayName = user.DisplayName
 	if err == gorm.ErrRecordNotFound {
+		u.Name = user.Name
+		u.DisplayName = user.DisplayName
 		u.Statistique = models.Stat{
 			Score: 0,
 		}
 		dataStore.Create(&u)
-	} else {
+	}
+	if u.Name != user.Name {
+		u.Name = user.Name
+		u.DisplayName = user.DisplayName
+		dataStore.Save(&u)
+	}
+	if u.DisplayName != user.DisplayName {
+		u.Name = user.Name
+		u.DisplayName = user.DisplayName
 		dataStore.Save(&u)
 	}
 }

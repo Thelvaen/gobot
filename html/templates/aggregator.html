@@ -1,7 +1,7 @@
-<h1>
+<h3>
     {{range $index, $channel := .Channels}} {{ $channel }} {{end}} {{ .MainChannel }}
-</h1>
-<table id="messages" data-url="{{ .BaseURL }}/json/messages" data-auto-refresh="true" data-auto-refresh-interval="5">
+</h3>
+<table id="messages" data-classes="table table-sm table-striped table-borderless" data-url="{{ .BaseURL }}/json/messages" data-auto-refresh="true" data-auto-refresh-interval="5" data-auto-refresh-silent="true" data-header-style="headerStyle">
     <thead>
         <tr>
             <th data-field="Channel">Channel</th>
@@ -42,5 +42,25 @@
             s = '0' + s
         }
         return h + ':' + m + ':' + s
+    }
+
+    function headerStyle(column) {
+        return {
+            Channel: {
+                css: {
+                    width: '100px'
+                }
+            },
+            Time: {
+                css: {
+                    width: '80px'
+                }
+            },
+            'User.DisplayName': {
+                css: {
+                    width: '150px'
+                }
+            },
+        }[column.field]
     }
 </script>

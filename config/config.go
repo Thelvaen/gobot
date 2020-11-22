@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"errors"
 	"math/rand"
 	"time"
@@ -84,28 +85,34 @@ func LoadAndParse() error {
 	} else {
 		WebConf.URL = ""
 	}
+
+	// CSRF Token
 	if viper.IsSet("Http.CSRF") {
-		WebConf.CSRF = []byte(viper.GetString("Http.CSRF"))
+		WebConf.CSRF, _ = base64.StdEncoding.DecodeString(viper.GetString("Http.CSRF"))
 	} else {
 		// Do some magic to create
 		WebConf.CSRF = securecookie.GenerateRandomKey(32)
-		viper.Set("Http.CSRF", string(WebConf.CSRF))
+		viper.Set("Http.CSRF", string(base64.StdEncoding.EncodeToString([]byte(WebConf.CSRF))))
 		viper.WriteConfig()
 	}
+
+	// HashKey
 	if viper.IsSet("Http.HashKey") {
-		WebConf.HashKey = []byte(viper.GetString("Http.HashKey"))
+		WebConf.HashKey, _ = base64.StdEncoding.DecodeString(viper.GetString("Http.HashKey"))
 	} else {
 		// Do some magic to create
 		WebConf.HashKey = securecookie.GenerateRandomKey(64)
-		viper.Set("Http.HashKey", string(WebConf.CSRF))
+		viper.Set("Http.HashKey", string(base64.StdEncoding.EncodeToString([]byte(WebConf.HashKey))))
 		viper.WriteConfig()
 	}
+
+	// BlockKey
 	if viper.IsSet("Http.BlockKey") {
-		WebConf.BlockKey = []byte(viper.GetString("Http.BlockKey"))
+		WebConf.BlockKey, _ = base64.StdEncoding.DecodeString(viper.GetString("Http.BlockKey"))
 	} else {
 		// Do some magic to create
 		WebConf.BlockKey = securecookie.GenerateRandomKey(32)
-		viper.Set("Http.BlockKey", string(WebConf.BlockKey))
+		viper.Set("Http.BlockKey", string(base64.StdEncoding.EncodeToString([]byte(WebConf.BlockKey))))
 		viper.WriteConfig()
 	}
 

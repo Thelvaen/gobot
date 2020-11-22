@@ -33,6 +33,7 @@ func pushMessage(message twitch.PrivateMessage) string {
 }
 
 func getMessagesPage(ctx iris.Context) {
+	ctx.ViewData("Channels", config.Aggreg.Channels)
 	if err := ctx.View("aggregator.html"); err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)
 		ctx.Writef(err.Error())
@@ -41,5 +42,9 @@ func getMessagesPage(ctx iris.Context) {
 
 func getMessagesData(ctx iris.Context) {
 	options := iris.JSON{Indent: "", Secure: false}
+	if len(messages) == 0 {
+		ctx.JSON("", options)
+		return
+	}
 	ctx.JSON(messages, options)
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Thelvaen/gobot/config"
 	auth "github.com/Thelvaen/iris-auth-gorm"
 	"github.com/iris-contrib/middleware/csrf"
 	"github.com/kataras/iris/v12"
@@ -16,6 +17,7 @@ func prepareContext(ctx iris.Context) {
 	if ctx.User() != nil {
 		userName, _ = ctx.User().GetUsername()
 	}
+	ctx.ViewData("MainChannel", config.Cred.Channel)
 	ctx.ViewData("UserName", userName)
 	ctx.ViewData("BaseURL", baseURL(ctx))
 	ctx.ViewData("CSRFToken", csrf.Token(ctx))
