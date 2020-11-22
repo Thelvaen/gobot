@@ -33,12 +33,12 @@ func webBot() *iris.Application {
 	// Adding CSRF Middleware
 	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(false)))
 
-	// Configuring Auth Middleware
-	auth.SetDB(dataStore)
-	auth.RequireAuthRoute("/login")
-
 	// Setting it to be used by the router
-	app.Use(auth.MiddleWare)
+	app.Use(auth.MiddleWare(auth.Config{
+		DataStore:     dataStore,
+		LoginRoute:    "/login",
+		ReturnOnError: true,
+	}))
 
 	// Adding context Middleware
 	app.Use(prepareContext)

@@ -24,8 +24,8 @@ github.com/Joker/hpp v1.0.0/go.mod h1:8x5n+M1Hp5hC0g8okX3sR3vFQwynaX/UgSOM9MeBKz
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 h1:WDC6ySpJzbxGWFh4aMxFFC28wwGp5pEuoTtvA4q/qQ4=
 github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398/go.mod h1:a1uqRtAwp2Xwc6WNPJEufxJ7fx3npB4UV/JOLmbu5I0=
-github.com/Thelvaen/iris-auth-gorm v0.1.5 h1:8ZJUwXaFcQnji5ejcEHVjb9Gi8+zBf2pEijOuzDaMIo=
-github.com/Thelvaen/iris-auth-gorm v0.1.5/go.mod h1:7nZ35zk0zD4I+Vjl1OtgtbUb229mDhn2nJ9QM3eNSlc=
+github.com/Thelvaen/iris-auth-gorm v0.1.9 h1:IIsQemDxFzWzvC64mYp/tAj8UnhjOAGaONi1t5Dprgs=
+github.com/Thelvaen/iris-auth-gorm v0.1.9/go.mod h1:7nZ35zk0zD4I+Vjl1OtgtbUb229mDhn2nJ9QM3eNSlc=
 github.com/ajg/form v1.5.1 h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
