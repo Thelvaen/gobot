@@ -1,6 +1,7 @@
 package main
 
 import (
+	auth "github.com/Thelvaen/iris-auth-gorm"
 	"github.com/iris-contrib/middleware/csrf"
 	"github.com/kataras/iris/v12"
 )
@@ -11,7 +12,11 @@ type route struct {
 }
 
 func prepareContext(ctx iris.Context) {
-	ctx.ViewData("UserName", (ctx))
+	userName := ""
+	if ctx.User() != nil {
+		userName, _ = ctx.User().GetUsername()
+	}
+	ctx.ViewData("UserName", userName)
 	ctx.ViewData("BaseURL", baseURL(ctx))
 	ctx.ViewData("CSRFToken", csrf.Token(ctx))
 	ctx.Next()
@@ -19,7 +24,8 @@ func prepareContext(ctx iris.Context) {
 
 func getNavigation(ctx iris.Context) {
 	var navigation []route
-	if ctx.User() != nil {
+	isAuth := auth.IsAuth(ctx)
+	if isAuth {
 		navigation = append(navigation, route{
 			Route: "/auth/messages",
 			Desc:  "Aggregateur",
@@ -29,7 +35,7 @@ func getNavigation(ctx iris.Context) {
 			Desc:  "Statistiques",
 		})
 	}
-	/*if isAdmin(ctx) {
+	if auth.IsAdmin(ctx) {
 		navigation = append(navigation, route{
 			Route: "/admin/giveaway",
 			Desc:  "GiveAways",
@@ -42,8 +48,8 @@ func getNavigation(ctx iris.Context) {
 			Route: "/admin/registerUser",
 			Desc:  "Créer un Utilisateur",
 		})
-	}*/
-	if ctx.User() != nil {
+	}
+	if isAuth {
 		navigation = append(navigation, route{
 			Route: "/logout",
 			Desc:  "Logout",
@@ -58,6 +64,11 @@ func getNavigation(ctx iris.Context) {
 	ctx.Next()
 }
 
-func baseURL(ctx iris.Context) string {
-	return ""
+func baseURL(ctx iris.Context) (url string) {
+	scheme := "http://"
+	if ctx.Request().TLS != nil {
+		scheme = "https://"
+	}
+	url = scheme + ctx.Request().Host
+	return
 }

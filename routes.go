@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Thelvaen/iris-auth-gorm"
+	auth "github.com/Thelvaen/iris-auth-gorm"
 
 	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/static"
@@ -33,19 +33,24 @@ func webBot() *iris.Application {
 	// Adding CSRF Middleware
 	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(false)))
 
-	// Adding auth Middleware
+	// Configuring Auth Middleware
 	auth.SetDB(dataStore)
 	auth.RequireAuthRoute("/login")
+
+	// Setting it to be used by the router
 	app.Use(auth.MiddleWare)
 
 	// Adding context Middleware
 	app.Use(prepareContext)
+	// Adding Navigation Items
+	app.Use(getNavigation)
 
 	// Adding templates & layouts
 	tmpl := iris.HTML(templates.AssetFile(), ".html").Reload(true)
 	tmpl.Layout("layouts/layout.html")
 	app.RegisterView(tmpl)
 
+	// Adding UnAuth Routes
 	app.Get("/login", loginHandlerForm)
 	app.Get("/logout", logoutHandler)
 	app.Post("/login", loginHandler)
@@ -53,13 +58,24 @@ func webBot() *iris.Application {
 		ctx.View("home.html")
 	})
 
-	// Adding routes
-	app.Get("/auth/messages", getMessagesPage)
-	app.Get("/json/messages", getMessagesData)
+	// Adding Auth Routes
+	app.PartyFunc("/auth", func(users iris.Party) {
+		users.Use(auth.MiddleAuth)
+		users.Get("/messages", getMessagesPage)
+		users.Get("/stats", getStats)
+	})
+	app.PartyFunc("/json", func(users iris.Party) {
+		users.Use(auth.MiddleAuth)
+		users.Get("/messages", getMessagesData)
+	})
 
-	app.Get("/auth/stats", getStats)
+	// Addming Admin Routes
+	app.PartyFunc("/admin", func(users iris.Party) {
+		users.Use(auth.MiddleAdmin)
+		users.Get("/register", getMessagesData)
+	})
 
-	// Adding static content
+	// Adding static content UnAuth
 	app.HandleDir("/static", static.AssetFile())
 
 	return app

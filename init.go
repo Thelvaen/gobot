@@ -5,12 +5,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/models"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func init() {
@@ -25,10 +27,20 @@ func init() {
 		log.Fatalln(err)
 	}
 
-	// Opening DB
+	// Configuring Gorm & Gorm Logger
+
+	gormLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold: time.Second,   // Slow SQL threshold
+			LogLevel:      logger.Silent, // Log level
+			Colorful:      true,          // Disable color
+		},
+	)
+
 	dbConf := gorm.Config{
 		FullSaveAssociations: true,
-		Logger:               nil,
+		Logger:               gormLogger,
 	}
 	dataStore, err = gorm.Open(sqlite.Open("twitchbot.db"), &dbConf)
 	if err != nil {
