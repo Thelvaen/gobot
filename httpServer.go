@@ -1,13 +1,12 @@
 package main
 
 import (
-	auth "github.com/Thelvaen/iris-auth-gorm"
-
 	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/static"
 	"github.com/Thelvaen/gobot/templates"
+	"github.com/Thelvaen/iris-auth-gorm"
 
-	"github.com/iris-contrib/middleware/csrf"
+	"github.com/Thelvaen/iris-csrf"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/sessions"
 
@@ -30,7 +29,6 @@ func webBot() *iris.Application {
 	// Adding sessions
 	app.Use(sessionsManager.Handler())
 
-	app.Use(debugMiddle)
 	// Adding CSRF Middleware
 	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(true)))
 

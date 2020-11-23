@@ -1,7 +1,7 @@
 package main
 
 import (
-	auth "github.com/Thelvaen/iris-auth-gorm"
+	"github.com/Thelvaen/iris-auth-gorm"
 	"github.com/Thelvaen/iris-auth-gorm/models"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/sessions"
