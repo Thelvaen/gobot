@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/Thelvaen/gobot/config"
 	auth "github.com/Thelvaen/iris-auth-gorm"
 	"github.com/iris-contrib/middleware/csrf"
@@ -24,6 +26,11 @@ func prepareContext(ctx iris.Context) {
 	ctx.Next()
 }
 
+func debugMiddle(ctx iris.Context) {
+	fmt.Println(ctx.Request().URL.Host)
+	ctx.Next()
+}
+
 func getNavigation(ctx iris.Context) {
 	var navigation []route
 	isAuth := auth.IsAuth(ctx)
@@ -37,7 +44,7 @@ func getNavigation(ctx iris.Context) {
 			Desc:  "Statistiques",
 		})
 	}
-	if auth.IsAdmin(ctx) {
+	if auth.HasRole(ctx, "admin") {
 		navigation = append(navigation, route{
 			Route: "/admin/giveaway",
 			Desc:  "GiveAways",
@@ -49,17 +56,6 @@ func getNavigation(ctx iris.Context) {
 		navigation = append(navigation, route{
 			Route: "/admin/registerUser",
 			Desc:  "Créer un Utilisateur",
-		})
-	}
-	if isAuth {
-		navigation = append(navigation, route{
-			Route: "/logout",
-			Desc:  "Logout",
-		})
-	} else {
-		navigation = append(navigation, route{
-			Route: "/login",
-			Desc:  "Login",
 		})
 	}
 	ctx.ViewData("Navigation", navigation)

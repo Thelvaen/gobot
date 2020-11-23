@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/Thelvaen/gobot/config"
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/kataras/iris/v12"
 )
 
 func main() {
@@ -29,8 +31,17 @@ func main() {
 
 	// Initializing WebServer for the bot
 	app := webBot()
+
 	// Executing WebServer for the bot
-	go app.Listen(config.WebConf.URL + ":" + strconv.Itoa(config.WebConf.Port))
+	if config.WebConf.Cert != "" && config.WebConf.Key != "" {
+		go app.Run(iris.TLS(config.WebConf.IP+":"+config.WebConf.Port, config.WebConf.Cert, config.WebConf.Key))
+		p, _ := strconv.Atoi(config.WebConf.Port)
+		newPort := strconv.Itoa(p + 1)
+		srv1 := &http.Server{Addr: config.WebConf.IP + ":" + newPort, Handler: app}
+		go srv1.ListenAndServe()
+	} else {
+		go app.Listen(config.WebConf.IP + ":" + config.WebConf.Port)
+	}
 
 	// Telling TwitchBot to join Main Channel
 	twitchC.Join(config.Cred.Channel)

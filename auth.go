@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Thelvaen/iris-auth-gorm"
+	auth "github.com/Thelvaen/iris-auth-gorm"
 	"github.com/Thelvaen/iris-auth-gorm/models"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/sessions"
@@ -18,7 +18,7 @@ func logoutHandler(ctx iris.Context) {
 	session := sessions.Get(ctx)
 	session.Delete("userID")
 	ctx.SetUser(nil)
-	ctx.Redirect("/", iris.StatusFound)
+	ctx.Redirect("/", iris.StatusTemporaryRedirect)
 }
 
 func loginHandler(ctx iris.Context) {
@@ -26,7 +26,7 @@ func loginHandler(ctx iris.Context) {
 
 	err := ctx.ReadForm(&user)
 	if err != nil && !iris.IsErrPath(err) {
-		ctx.Redirect("/login", iris.StatusFound)
+		ctx.Redirect("/login", iris.StatusTemporaryRedirect)
 		return
 	}
 	auth.Check(user, ctx)

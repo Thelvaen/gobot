@@ -16,7 +16,7 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Fonctions du Bot</a>
+        <a class="navbar-brand" href="#">TwichBot</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -24,6 +24,17 @@
             <ul class="navbar-nav navbar-right">
                 {{ range $route, $routeDetails := .Navigation }}
                 <li class="nav-item"><a class="nav-link" href="{{ $routeDetails.Route }}">{{ $routeDetails.Desc }}</a></li>
+                {{ end }} {{ if .UserName }}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ .UserName }}</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/auth/changePwd">Changement du mot de passe</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Logout</a>
+                    </div>
+                </li>
+                {{ else }}
+                <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
                 {{ end }}
             </ul>
         </div>

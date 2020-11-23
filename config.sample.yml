@@ -1,10 +1,15 @@
-Twitch:
-    Channel: TwitchUserName
-    Token: oauth:XXXXXXXXXXX
-Http:
-    Port: 8090
-    URL:
-Aggreg:
-    StackSize: 60
-    Channels:
+twitch:
+    channel: TwitchUserName
+    token: oauth:XXXXXXXXXXX
+http:
+    port: 8090
+    url:
+aggreg:
+    stacksize: 60
+    channels:
         - megadamage
+smtp:
+    server: localhost
+    port: 25
+    username:
+    password:

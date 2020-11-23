@@ -30,11 +30,12 @@ func webBot() *iris.Application {
 	// Adding sessions
 	app.Use(sessionsManager.Handler())
 
+	app.Use(debugMiddle)
 	// Adding CSRF Middleware
-	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(false)))
+	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(true)))
 
 	// Setting it to be used by the router
-	app.Use(auth.MiddleWare(auth.Config{
+	app.Use(auth.Init(auth.Config{
 		DataStore:     dataStore,
 		LoginRoute:    "/login",
 		ReturnOnError: true,
@@ -50,13 +51,14 @@ func webBot() *iris.Application {
 	tmpl.Layout("layouts/layout.html")
 	app.RegisterView(tmpl)
 
+	// Adding static content UnAuth
+	app.HandleDir("/static", static.AssetFile())
+
 	// Adding UnAuth Routes
+	app.Get("/", getHome)
 	app.Get("/login", loginHandlerForm)
 	app.Get("/logout", logoutHandler)
 	app.Post("/login", loginHandler)
-	app.Get("/", func(ctx iris.Context) {
-		ctx.View("home.html")
-	})
 
 	// Adding Auth Routes
 	app.PartyFunc("/auth", func(users iris.Party) {
@@ -64,19 +66,25 @@ func webBot() *iris.Application {
 		users.Get("/messages", getMessagesPage)
 		users.Get("/stats", getStats)
 	})
-	app.PartyFunc("/json", func(users iris.Party) {
-		users.Use(auth.MiddleAuth)
-		users.Get("/messages", getMessagesData)
+
+	app.PartyFunc("/json", func(json iris.Party) {
+		json.Use(auth.MiddleAuth)
+		json.Get("/messages", getMessagesData)
 	})
 
 	// Addming Admin Routes
-	app.PartyFunc("/admin", func(users iris.Party) {
-		users.Use(auth.MiddleAdmin)
-		users.Get("/register", getMessagesData)
+	app.PartyFunc("/admin", func(admin iris.Party) {
+		admin.Use(auth.MiddleRole("admin"))
+		admin.Get("/registerUser", createUserForm)
+		admin.Post("/registerUser", createUser)
 	})
 
-	// Adding static content UnAuth
-	app.HandleDir("/static", static.AssetFile())
-
 	return app
+}
+
+func getHome(ctx iris.Context) {
+	if err := ctx.View("home.html"); err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.Writef(err.Error())
+	}
 }

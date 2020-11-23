@@ -17,5 +17,5 @@ echo Building static assets file
 go-bindata -fs -pkg static -o static/static.go -prefix "html/static/" html/static/...
 echo Compiling the bot
 time go build
-echo Starting the bot
-./gobot
+echo Starting the bot as root to get access to certs
+sudo ./gobot
