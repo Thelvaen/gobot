@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/Thelvaen/auth"
 	"github.com/Thelvaen/csrf"
-	"github.com/Thelvaen/gobot/config"
 	"github.com/kataras/iris/v12"
 )
 
@@ -17,7 +16,7 @@ func prepareContext(ctx iris.Context) {
 	if ctx.User() != nil {
 		userName, _ = ctx.User().GetUsername()
 	}
-	ctx.ViewData("MainChannel", config.Cred.Channel)
+	ctx.ViewData("MainChannel", conf.Cred.Channel)
 	ctx.ViewData("UserName", userName)
 	ctx.ViewData("BaseURL", baseURL(ctx))
 	ctx.ViewData("csrfField", csrf.TemplateField(ctx))

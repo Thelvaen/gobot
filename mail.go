@@ -9,7 +9,6 @@ import (
 	"text/template"
 
 	"github.com/Thelvaen/auth/models"
-	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/templates"
 )
 
@@ -38,15 +37,15 @@ func sendMail(token string, id uint) {
 	}
 
 	mail := mailVars{
-		MainChannel: config.Cred.Channel,
-		BaseURL:     config.WebConf.URL,
+		MainChannel: conf.Cred.Channel,
+		BaseURL:     conf.WebConf.URL,
 		User:        user.Username,
 		Token:       token,
 	}
 
 	// Sender data.
-	if config.MailConf.From != "" {
-		from = config.MailConf.From
+	if conf.MailConf.From != "" {
+		from = conf.MailConf.From
 	} else {
 		from = "no-reply@twitchbot.domain"
 	}
@@ -65,14 +64,14 @@ func sendMail(token string, id uint) {
 	msg = append(msg, message.Bytes()...)
 
 	var auth smtp.Auth
-	if config.MailConf.Username == "" && config.MailConf.Password == "" {
+	if conf.MailConf.Username == "" && conf.MailConf.Password == "" {
 		auth = nil
 		fmt.Println("auth nil")
 	} else {
-		auth = smtp.PlainAuth("", config.MailConf.Username, config.MailConf.Password, config.MailConf.Host)
+		auth = smtp.PlainAuth("", conf.MailConf.Username, conf.MailConf.Password, conf.MailConf.Host)
 	}
 
-	err = smtp.SendMail(config.MailConf.Host+":"+config.MailConf.Port, auth, from, to, msg)
+	err = smtp.SendMail(conf.MailConf.Host+":"+conf.MailConf.Port, auth, from, to, msg)
 	if err != nil {
 		fmt.Println(err)
 	}

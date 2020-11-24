@@ -10,35 +10,39 @@ import (
 	"github.com/spf13/viper"
 )
 
-type credential struct {
-	Channel string
-	Token   string
-}
-
-type aggregation struct {
-	StackSize int
-	Channels  []string
-}
-
-type webConfiguration struct {
-	IP       string
-	Port     string
-	URL      string
-	Key      string
-	Cert     string
-	CSRF     []byte
-	HashKey  []byte
-	BlockKey []byte
-	IsSecure bool
-}
-
-// SMTP struct gives the package the SMTP details to send token to user to initialize password or to change them when lost
-type SMTP struct {
-	Host     string
-	Port     string
-	From     string
-	Username string
-	Password string
+// Configuration structure holds the configuration
+type Configuration struct {
+	IsAuth bool
+	// Cred holds the Twitch authentication credential
+	Cred struct {
+		Channel string
+		Token   string
+	}
+	// Aggreg holds the information about the aggregator module
+	Aggreg struct {
+		StackSize int
+		Channels  []string
+	}
+	// WebConf holds the web server details
+	WebConf struct {
+		IP       string
+		Port     string
+		URL      string
+		Key      string
+		Cert     string
+		CSRF     []byte
+		HashKey  []byte
+		BlockKey []byte
+		IsSecure bool
+	}
+	// MailConf holds the SMTP server details
+	MailConf struct {
+		Host     string
+		Port     string
+		From     string
+		Username string
+		Password string
+	}
 }
 
 var (
@@ -47,128 +51,124 @@ var (
 	// ErrorLogin indicates that no login has been provided
 	ErrorLogin = errors.New("no login provided in the config file")
 	// IsAuth is set to true if oAuth token has been provided in the config file
-	IsAuth = false
-	// Cred holds the Twitch authentication credential
-	Cred credential
-	// Aggreg holds the information about the aggregator module
-	Aggreg aggregation
-	// WebConf holds the web server details
-	WebConf webConfiguration
-	// MailConf holds the SMTP server details
-	MailConf SMTP
 
 	// internal vars
 	seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
-// LoadAndParse gets config from the YAML file and assign it's content to variables
-func LoadAndParse() error {
+// NewConfig gets config from the YAML file and assign it's content to variables
+func NewConfig() (*Configuration, error) {
+	conf := &Configuration{}
+
+	// Init Viper
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
+
+	// Loading conf in Viper
 	err := viper.ReadInConfig()
 	if err != nil {
-		return ErrorLoading
+		return nil, ErrorLoading
 	}
 
 	// Twitch Authentication information
 	if !viper.IsSet("twitch.channel") {
-		return ErrorLogin
+		return nil, ErrorLogin
 	}
-	Cred.Channel = viper.GetString("twitch.channel")
+	conf.Cred.Channel = viper.GetString("twitch.channel")
 	if viper.IsSet("twitch.token") {
-		IsAuth = true
-		Cred.Token = viper.GetString("twitch.token")
+		conf.IsAuth = true
+		conf.Cred.Token = viper.GetString("twitch.token")
 	}
 
 	// Config related to Aggregator module
 	if viper.IsSet("aggreg.stacksize") {
-		Aggreg.StackSize = viper.GetInt("aggreg.stacksize")
+		conf.Aggreg.StackSize = viper.GetInt("aggreg.stacksize")
 	} else {
-		Aggreg.StackSize = 40
+		conf.Aggreg.StackSize = 40
 	}
 	if viper.IsSet("aggreg.channels") {
-		Aggreg.Channels = viper.GetStringSlice("aggreg.channels")
+		conf.Aggreg.Channels = viper.GetStringSlice("aggreg.channels")
 	}
 
 	// HTTP Config
 	if viper.IsSet("http.ip") {
-		WebConf.IP = viper.GetString("http.ip")
+		conf.WebConf.IP = viper.GetString("http.ip")
 	} else {
-		WebConf.IP = ""
+		conf.WebConf.IP = ""
 	}
 	if viper.IsSet("http.port") {
-		WebConf.Port = viper.GetString("http.port")
+		conf.WebConf.Port = viper.GetString("http.port")
 	} else {
-		WebConf.Port = "8090"
+		conf.WebConf.Port = "8090"
 	}
 	if viper.IsSet("http.url") {
-		WebConf.URL = viper.GetString("http.url")
+		conf.WebConf.URL = viper.GetString("http.url")
 	} else {
-		WebConf.URL = ""
+		conf.WebConf.URL = ""
 	}
 	if viper.IsSet("http.cert.key") {
-		WebConf.Key = viper.GetString("http.cert.key")
+		conf.WebConf.Key = viper.GetString("http.cert.key")
 	} else {
-		WebConf.Key = ""
+		conf.WebConf.Key = ""
 	}
 	if viper.IsSet("http.cert.cert") {
-		WebConf.Cert = viper.GetString("http.cert.cert")
+		conf.WebConf.Cert = viper.GetString("http.cert.cert")
 	} else {
-		WebConf.Cert = ""
+		conf.WebConf.Cert = ""
 	}
 
 	// Mail Server
 	if viper.IsSet("smtp.host") {
-		MailConf.Host = viper.GetString("smtp.host")
+		conf.MailConf.Host = viper.GetString("smtp.host")
 	}
 	if viper.IsSet("smtp.port") {
-		MailConf.Port = viper.GetString("smtp.port")
+		conf.MailConf.Port = viper.GetString("smtp.port")
 	}
 	if viper.IsSet("smtp.from") {
-		MailConf.From = viper.GetString("smtp.from")
+		conf.MailConf.From = viper.GetString("smtp.from")
 	}
 	if viper.IsSet("smtp.username") {
-		MailConf.Username = viper.GetString("smtp.username")
+		conf.MailConf.Username = viper.GetString("smtp.username")
 	}
 	if viper.IsSet("smtp.password") {
-		MailConf.Password = viper.GetString("smtp.password")
+		conf.MailConf.Password = viper.GetString("smtp.password")
 	}
 
 	// CSRF Token
 	if viper.IsSet("http.csrf") {
-		WebConf.CSRF, _ = base64.StdEncoding.DecodeString(viper.GetString("http.csrf"))
+		conf.WebConf.CSRF, _ = base64.StdEncoding.DecodeString(viper.GetString("http.csrf"))
 	} else {
 		// Do some magic to create
-		WebConf.CSRF = securecookie.GenerateRandomKey(32)
-		viper.Set("http.csrf", string(base64.StdEncoding.EncodeToString([]byte(WebConf.CSRF))))
+		conf.WebConf.CSRF = securecookie.GenerateRandomKey(32)
+		viper.Set("http.csrf", string(base64.StdEncoding.EncodeToString([]byte(conf.WebConf.CSRF))))
 		viper.WriteConfig()
 	}
 
 	// HashKey
 	if viper.IsSet("http.hashkey") {
-		WebConf.HashKey, _ = base64.StdEncoding.DecodeString(viper.GetString("http.hashkey"))
+		conf.WebConf.HashKey, _ = base64.StdEncoding.DecodeString(viper.GetString("http.hashkey"))
 	} else {
 		// Do some magic to create
-		WebConf.HashKey = securecookie.GenerateRandomKey(64)
-		viper.Set("http.hashkey", string(base64.StdEncoding.EncodeToString([]byte(WebConf.HashKey))))
+		conf.WebConf.HashKey = securecookie.GenerateRandomKey(64)
+		viper.Set("http.hashkey", string(base64.StdEncoding.EncodeToString([]byte(conf.WebConf.HashKey))))
 		viper.WriteConfig()
 	}
 
 	// BlockKey
 	if viper.IsSet("http.blockkey") {
-		WebConf.BlockKey, _ = base64.StdEncoding.DecodeString(viper.GetString("http.blockkey"))
+		conf.WebConf.BlockKey, _ = base64.StdEncoding.DecodeString(viper.GetString("http.blockkey"))
 	} else {
 		// Do some magic to create
-		WebConf.BlockKey = securecookie.GenerateRandomKey(32)
-		viper.Set("http.blockkey", string(base64.StdEncoding.EncodeToString([]byte(WebConf.BlockKey))))
+		conf.WebConf.BlockKey = securecookie.GenerateRandomKey(32)
+		viper.Set("http.blockkey", string(base64.StdEncoding.EncodeToString([]byte(conf.WebConf.BlockKey))))
 		viper.WriteConfig()
 	}
 
-	if WebConf.Cert != "" && WebConf.Key != "" {
-		WebConf.IsSecure = true
+	if conf.WebConf.Cert != "" && conf.WebConf.Key != "" {
+		conf.WebConf.IsSecure = true
 	} else {
-		WebConf.IsSecure = false
+		conf.WebConf.IsSecure = false
 	}
 
-	return nil
+	return conf, nil
 }

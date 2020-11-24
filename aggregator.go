@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/Thelvaen/gobot/config"
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/kataras/iris/v12"
 )
@@ -16,13 +15,13 @@ func initAggregator() {
 		filterRegEx: ".*",
 	})
 
-	for _, channel := range config.Aggreg.Channels {
+	for _, channel := range conf.Aggreg.Channels {
 		twitchC.Join(channel)
 	}
 }
 
 func pushMessage(message twitch.PrivateMessage) string {
-	if len(messages) > config.Aggreg.StackSize {
+	if len(messages) > conf.Aggreg.StackSize {
 		i := 0
 		copy(messages[i:], messages[i+1:])
 		//messages[len(messages)-1] = ""
@@ -33,7 +32,7 @@ func pushMessage(message twitch.PrivateMessage) string {
 }
 
 func getMessagesPage(ctx iris.Context) {
-	ctx.ViewData("Channels", config.Aggreg.Channels)
+	ctx.ViewData("Channels", conf.Aggreg.Channels)
 	if err := ctx.View("aggregator.html"); err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)
 		ctx.Writef(err.Error())

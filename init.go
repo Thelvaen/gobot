@@ -16,9 +16,9 @@ import (
 )
 
 func init() {
-	err := config.LoadAndParse()
+	conf, err := config.NewConfig()
 	if err == config.ErrorLoading {
-		log.Fatalln("can't open config.yml file")
+		log.Fatalln("can't open conf.yml file")
 	}
 	if err == config.ErrorLogin {
 		log.Fatalln("main Channel not provided in the config")

@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/models"
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/kataras/iris/v12"
@@ -29,7 +28,7 @@ func initStats() {
 }
 
 func pushStats(message twitch.PrivateMessage) string {
-	if message.Channel != config.Cred.Channel {
+	if message.Channel != conf.Cred.Channel {
 		return ""
 	}
 	if len(message.Message) < 10 {
@@ -55,7 +54,7 @@ func pushStats(message twitch.PrivateMessage) string {
 
 func getCliStats(message twitch.PrivateMessage) string {
 	// Outputting stats to the channel
-	if message.Channel != config.Cred.Channel {
+	if message.Channel != conf.Cred.Channel {
 		return ""
 	}
 

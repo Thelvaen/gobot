@@ -3,25 +3,24 @@ package main
 import (
 	"regexp"
 
-	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/models"
 	"github.com/gempir/go-twitch-irc/v2"
 	"gorm.io/gorm"
 )
 
 func pushAndSay(data string) {
-	twitchC.Say(config.Cred.Channel, data)
+	twitchC.Say(conf.Cred.Channel, data)
 }
 
 func parseMessage(message twitch.PrivateMessage) {
-	if config.IsAuth {
+	if conf.IsAuth {
 		// Command to process
 		updateTwitchUser(message.User)
 		for _, filterDetails := range filters {
 			found, _ := regexp.MatchString(filterDetails.filterRegEx, message.Message)
 			if found {
 				botProcess := filterDetails.filterFunc(message)
-				if message.Channel == config.Cred.Channel {
+				if message.Channel == conf.Cred.Channel {
 					pushAndSay(botProcess)
 				}
 			}

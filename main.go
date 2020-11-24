@@ -5,16 +5,15 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Thelvaen/gobot/config"
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/kataras/iris/v12"
 )
 
 func main() {
 	// Initializing twitch Client
-	if config.IsAuth {
+	if conf.IsAuth {
 		// Credential provided, authed connection
-		twitchC = twitch.NewClient(config.Cred.Channel, config.Cred.Token)
+		twitchC = twitch.NewClient(conf.Cred.Channel, conf.Cred.Token)
 	} else {
 		// No credentials provided, anon connection
 		twitchC = twitch.NewAnonymousClient()
@@ -33,18 +32,18 @@ func main() {
 	app := webBot()
 
 	// Executing WebServer for the bot
-	if config.WebConf.IsSecure {
-		go app.Run(iris.TLS(config.WebConf.IP+":"+config.WebConf.Port, config.WebConf.Cert, config.WebConf.Key))
-		p, _ := strconv.Atoi(config.WebConf.Port)
+	if conf.WebConf.IsSecure {
+		go app.Run(iris.TLS(conf.WebConf.IP+":"+conf.WebConf.Port, conf.WebConf.Cert, conf.WebConf.Key))
+		p, _ := strconv.Atoi(conf.WebConf.Port)
 		newPort := strconv.Itoa(p + 1)
-		srv1 := &http.Server{Addr: config.WebConf.IP + ":" + newPort, Handler: app}
+		srv1 := &http.Server{Addr: conf.WebConf.IP + ":" + newPort, Handler: app}
 		go srv1.ListenAndServe()
 	} else {
-		go app.Listen(config.WebConf.IP + ":" + config.WebConf.Port)
+		go app.Listen(conf.WebConf.IP + ":" + conf.WebConf.Port)
 	}
 
 	// Telling TwitchBot to join Main Channel
-	twitchC.Join(config.Cred.Channel)
+	twitchC.Join(conf.Cred.Channel)
 
 	// Connection to Twitch
 	err := twitchC.Connect()

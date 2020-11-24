@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Thelvaen/auth"
-	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/static"
 	"github.com/Thelvaen/gobot/templates"
 
@@ -17,8 +16,8 @@ func webBot() *iris.Application {
 
 	// attach a session manager
 	sessionsManager = sessions.New(sessions.Config{
-		Cookie:                      config.Cred.Channel,
-		Encoding:                    securecookie.New(config.WebConf.HashKey, config.WebConf.BlockKey),
+		Cookie:                      conf.Cred.Channel,
+		Encoding:                    securecookie.New(conf.WebConf.HashKey, conf.WebConf.BlockKey),
 		AllowReclaim:                true,
 		DisableSubdomainPersistence: true,
 	})
@@ -30,7 +29,7 @@ func webBot() *iris.Application {
 	app.Use(sessionsManager.Handler())
 
 	// Adding CSRF Middleware
-	app.Use(csrf.Protect(config.WebConf.CSRF, csrf.Secure(config.WebConf.IsSecure)))
+	app.Use(csrf.Protect(conf.WebConf.CSRF, csrf.Secure(conf.WebConf.IsSecure)))
 
 	// Setting it to be used by the router
 	app.Use(auth.Init(auth.Config{
