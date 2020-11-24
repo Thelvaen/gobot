@@ -8,7 +8,5 @@
             <label for="form-email">Mot de passe</label>
             <input name="email" placeholder="eMail..." class="form-email form-control" id="form-email" type="text" required>
         </div>
-        <button type="submit" class="btn btn-primary">Créer l'utilisateur</button>
-        <input type="hidden" name="csrf.token" value="{{ .CSRFToken }}" />
-    </form>
+        <button type="submit" class="btn btn-primary">Créer l'utilisateur</button> {{ .csrfField }} </form>
 </div>

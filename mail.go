@@ -8,9 +8,9 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Thelvaen/auth/models"
 	"github.com/Thelvaen/gobot/config"
 	"github.com/Thelvaen/gobot/templates"
-	"github.com/Thelvaen/iris-auth-gorm/models"
 )
 
 type mailVars struct {

@@ -33,7 +33,7 @@ func main() {
 	app := webBot()
 
 	// Executing WebServer for the bot
-	if config.WebConf.Cert != "" && config.WebConf.Key != "" {
+	if config.WebConf.IsSecure {
 		go app.Run(iris.TLS(config.WebConf.IP+":"+config.WebConf.Port, config.WebConf.Cert, config.WebConf.Key))
 		p, _ := strconv.Atoi(config.WebConf.Port)
 		newPort := strconv.Itoa(p + 1)

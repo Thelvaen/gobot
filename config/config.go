@@ -29,6 +29,7 @@ type webConfiguration struct {
 	CSRF     []byte
 	HashKey  []byte
 	BlockKey []byte
+	IsSecure bool
 }
 
 // SMTP struct gives the package the SMTP details to send token to user to initialize password or to change them when lost
@@ -161,6 +162,12 @@ func LoadAndParse() error {
 		WebConf.BlockKey = securecookie.GenerateRandomKey(32)
 		viper.Set("http.blockkey", string(base64.StdEncoding.EncodeToString([]byte(WebConf.BlockKey))))
 		viper.WriteConfig()
+	}
+
+	if WebConf.Cert != "" && WebConf.Key != "" {
+		WebConf.IsSecure = true
+	} else {
+		WebConf.IsSecure = false
 	}
 
 	return nil
