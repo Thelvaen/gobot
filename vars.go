@@ -17,5 +17,5 @@ var (
 	twitchC         *twitch.Client
 	dataStore       *gorm.DB
 	filters         []filter
-	conf            config.Configuration
+	conf            *config.Configuration
 )

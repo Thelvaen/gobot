@@ -16,7 +16,8 @@ import (
 )
 
 func init() {
-	conf, err := config.NewConfig()
+	var err error
+	conf, err = config.NewConfig()
 	if err == config.ErrorLoading {
 		log.Fatalln("can't open conf.yml file")
 	}
