@@ -56,6 +56,7 @@ Description=Twitch Bot
 After=network.target
 
 [Service]
+WorkingDirectory=/var/local/gobot
 ExecStart=/usr/sbin/gobot
 
 [Install]

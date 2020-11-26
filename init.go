@@ -43,7 +43,9 @@ func init() {
 		FullSaveAssociations: true,
 		Logger:               gormLogger,
 	}
-	dataStore, err = gorm.Open(sqlite.Open("twitchbot.db"), &dbConf)
+
+	dbFile := "twitchbot.db"
+	dataStore, err = gorm.Open(sqlite.Open(dbFile), &dbConf)
 	if err != nil {
 		log.Fatalf("can't open Sqlite3 DB : %s", err)
 	}

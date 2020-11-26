@@ -25,4 +25,5 @@ func createUser(ctx iris.Context) {
 	}
 	token, uuid := auth.CreateUser(user)
 	sendMail(ctx, token, uuid)
+	ctx.Redirect("/", iris.StatusFound)
 }
