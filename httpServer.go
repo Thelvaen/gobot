@@ -56,12 +56,16 @@ func webBot() *iris.Application {
 	app.Get("/login", loginHandlerForm)
 	app.Get("/logout", logoutHandler)
 	app.Post("/login", loginHandler)
+	app.Get("/resetPwd", resetPwdForm)
+	app.Post("/resetPwd", resetPwd)
 
 	// Adding Auth Routes
 	app.PartyFunc("/auth", func(users iris.Party) {
 		users.Use(auth.MiddleAuth)
 		users.Get("/messages", getMessagesPage)
 		users.Get("/stats", getStats)
+		app.Get("/changePwd", changePwdForm)
+		app.Post("/changePwd", changePwd)
 	})
 
 	app.PartyFunc("/json", func(json iris.Party) {

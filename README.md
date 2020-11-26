@@ -44,3 +44,27 @@ Then you can build the bot with:
 ```
 go build
 ```
+
+# Runing in background (systemd)
+copy the gobot binary to /usr/sbin, then create a service file in /etc/systemd/system/ :
+```
+sudo nano /etc/systemd/system/gobot.service
+```
+```
+[Unit]
+Description=Twitch Bot
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/gobot
+
+[Install]
+WantedBy=multi-user.target
+```
+
+then execute:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable gobot
+sudo systemctl start gobot
+```

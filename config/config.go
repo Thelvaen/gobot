@@ -62,6 +62,7 @@ func NewConfig() (*Configuration, error) {
 
 	// Init Viper
 	viper.SetConfigName("config")
+	viper.AddConfigPath("/etc/gobot/")
 	viper.AddConfigPath(".")
 
 	// Loading conf in Viper

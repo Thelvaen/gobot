@@ -1,0 +1,25 @@
+<!--Section: Block Content-->
+<section class="mb-5 text-center">
+    <p>Changement du mot de passe</p>
+    <form method="post">
+        <div class="md-form md-outline">
+            <input name="oldpassword" type="password" id="oldPass" class="form-control">
+            <label data-error="wrong" data-success="right" for="newPass">New password</label>
+        </div>
+        <div class="md-form md-outline">
+            <input name="newpassword" type="password" id="newPass" class="form-control">
+            <label data-error="wrong" data-success="right" for="newPass">New password</label>
+        </div>
+        <div class="md-form md-outline">
+            <input type="password" id="newPassConfirm" class="form-control">
+            <label data-error="wrong" data-success="right" for="newPassConfirm">Confirm password</label>
+        </div>
+        <button type="submit" class="btn btn-primary mb-4">Change password</button> {{ .csrfField }}
+    </form>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        {{ if .UserName }}
+        <u><a href="{{ .BaseURL }}/">Retour à l'accueil</a></u> {{ else }}
+        <u><a href="{{ .BaseURL }}/login/">Retour au login</a></u> {{ end }}
+    </div>
+</section>
+<!--Section: Block Content-->

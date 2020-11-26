@@ -16,10 +16,13 @@ func createUserForm(ctx iris.Context) {
 func createUser(ctx iris.Context) {
 	var user models.User
 
+	roles := []string{"user"}
 	err := ctx.ReadForm(&user)
+	user.Roles = roles
 	if err != nil && !iris.IsErrPath(err) {
 		ctx.Redirect("/admin/registerUser", iris.StatusFound)
 		return
 	}
-	sendMail(auth.CreateUser(user))
+	token, uuid := auth.CreateUser(user)
+	sendMail(ctx, token, uuid)
 }

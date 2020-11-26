@@ -10,12 +10,15 @@ import (
 
 	"github.com/Thelvaen/auth/models"
 	"github.com/Thelvaen/gobot/templates"
+	"github.com/google/uuid"
+	"github.com/kataras/iris/v12"
 )
 
 type mailVars struct {
 	MainChannel string
 	BaseURL     string
 	User        string
+	UserID      string
 	Token       string
 }
 
@@ -23,12 +26,12 @@ type tokenStruct struct {
 	Token string `json:"password"`
 }
 
-func sendMail(token string, id uint) {
+func sendMail(ctx iris.Context, token string, id uuid.UUID) {
 	var err error
 	var user models.User
 	var from string
 
-	err = dataStore.Debug().Where("id = ?", id).First(&user).Error
+	err = dataStore.Where("id = ?", id).First(&user).Error
 
 	mailT, _ := templates.Asset("mailTemplate.tmpl")
 	tmpl := template.Must(template.New("mailTemplate").Parse(string(mailT)))
@@ -38,8 +41,9 @@ func sendMail(token string, id uint) {
 
 	mail := mailVars{
 		MainChannel: conf.Cred.Channel,
-		BaseURL:     conf.WebConf.URL,
+		BaseURL:     baseURL(ctx),
 		User:        user.Username,
+		UserID:      user.ID.String(),
 		Token:       token,
 	}
 
@@ -66,7 +70,6 @@ func sendMail(token string, id uint) {
 	var auth smtp.Auth
 	if conf.MailConf.Username == "" && conf.MailConf.Password == "" {
 		auth = nil
-		fmt.Println("auth nil")
 	} else {
 		auth = smtp.PlainAuth("", conf.MailConf.Username, conf.MailConf.Password, conf.MailConf.Host)
 	}
