@@ -46,6 +46,8 @@ go build
 ```
 
 # Runing in background (systemd)
+copy config to /etc/gobot/
+copy twitchbot.db to /var/local/gobot/ (if you don't have a .db file yet, please create the file at least)
 copy the gobot binary to /usr/sbin, then create a service file in /etc/systemd/system/ :
 ```
 sudo nano /etc/systemd/system/gobot.service
