@@ -26,8 +26,8 @@ github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 h1:WDC6ySpJzbxG
 github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398/go.mod h1:a1uqRtAwp2Xwc6WNPJEufxJ7fx3npB4UV/JOLmbu5I0=
 github.com/Thelvaen/auth v0.1.24 h1:+MGOuFKG9OlJzcSNP/xdcEzHw8yevtLJWKFmf8hT9rY=
 github.com/Thelvaen/auth v0.1.24/go.mod h1:s3dgMM5qD3ObntR2IMF/VcBO18CLJbpMapEBOo04/O8=
-github.com/Thelvaen/csrf v0.1.1 h1:BSzgJiIzQ2Z0VTZfyhx5Hbd0qQFszmt0piDn4sjpUyI=
-github.com/Thelvaen/csrf v0.1.1/go.mod h1:ySOhMDqfRH2kLr/2HbwBAM8j1JSp84QzwwkGGFj6I3k=
+github.com/Thelvaen/csrf v0.1.2 h1:NyyZCJisf+m22ybFWRhOCXp4TKdX+tMN8+BlEKswzYE=
+github.com/Thelvaen/csrf v0.1.2/go.mod h1:ySOhMDqfRH2kLr/2HbwBAM8j1JSp84QzwwkGGFj6I3k=
 github.com/ajg/form v1.5.1 h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=

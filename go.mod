@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/Thelvaen/auth v0.1.24
-	github.com/Thelvaen/csrf v0.1.1
+	github.com/Thelvaen/csrf v0.1.2
 	github.com/gempir/go-twitch-irc/v2 v2.5.0
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/securecookie v1.1.1
